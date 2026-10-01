@@ -12,6 +12,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Fix file structure
+        run: |
+          echo "===== Before ====="
+          ls -la
+          ls -la .github/workflows/ || true
+          
+          # اگر فایل‌ها اشتباهاً داخل .github/workflows هستند، به ریشه منتقل کن
+          if [ -d ".github/workflows/app" ]; then
+            mv .github/workflows/app ./app
+          fi
+          if [ -f ".github/workflows/build.gradle" ]; then
+            mv .github/workflows/build.gradle ./build.gradle
+          fi
+          if [ -f ".github/workflows/settings.gradle" ]; then
+            mv .github/workflows/settings.gradle ./settings.gradle
+          fi
+          if [ -f ".github/workflows/gradle.properties" ]; then
+            mv .github/workflows/gradle.properties ./gradle.properties
+          fi
+          
+          echo "===== After ====="
+          ls -la
+          ls -la app/ || true
+          ls -la app/src/main/ || true
+
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
