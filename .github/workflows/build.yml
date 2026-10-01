@@ -18,67 +18,141 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Show current structure
+      - name: Reorganize existing files
         run: |
-          echo "===== ALL FILES ====="
-          find . -type f -not -path "./.git/*" | sort
-
-      - name: Reorganize files to correct locations
-        run: |
-          # ساخت پوشه‌های مقصد
           mkdir -p app/src/main/java/com/ahvaz/oilquiz
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/assets
 
-          # پیدا کردن و کپی کردن AndroidManifest.xml
           M=$(find . -name "AndroidManifest.xml" -not -path "./.git/*" | head -1)
           [ -n "$M" ] && cp "$M" app/src/main/AndroidManifest.xml
 
-          # پیدا کردن و کپی کردن MainActivity.java
           M=$(find . -name "MainActivity.java" -not -path "./.git/*" | head -1)
           [ -n "$M" ] && cp "$M" app/src/main/java/com/ahvaz/oilquiz/MainActivity.java
 
-          # پیدا کردن و کپی کردن activity_main.xml
           M=$(find . -name "activity_main.xml" -not -path "./.git/*" | head -1)
           [ -n "$M" ] && cp "$M" app/src/main/res/layout/activity_main.xml
 
-          # پیدا کردن و کپی کردن strings.xml
           M=$(find . -name "strings.xml" -not -path "./.git/*" | head -1)
           [ -n "$M" ] && cp "$M" app/src/main/res/values/strings.xml
 
-          # پیدا کردن و کپی کردن themes.xml
           M=$(find . -name "themes.xml" -not -path "./.git/*" | head -1)
           [ -n "$M" ] && cp "$M" app/src/main/res/values/themes.xml
 
-          # پیدا کردن و کپی کردن index.html
           M=$(find . -name "index.html" -not -path "./.git/*" | head -1)
           [ -n "$M" ] && cp "$M" app/src/main/assets/index.html
 
-          # پیدا کردن app/build.gradle (فایلی که شامل com.android.application است)
-          M=$(grep -rl "com.android.application" --include="build.gradle" . 2>/dev/null | head -1)
+          # app/build.gradle
+          M=$(grep -rl "com.android.application" --include="build.gradle" . 2>/dev/null | grep -v "./.git" | head -1)
           [ -n "$M" ] && cp "$M" app/build.gradle
 
-          # پیدا کردن build.gradle ریشه (فایلی که شامل com.android.application نیست)
-          M=$(grep -rL "com.android.application" --include="build.gradle" . 2>/dev/null | grep -v "./.git" | head -1)
-          [ -n "$M" ] && cp "$M" build.gradle
-
-          # پیدا کردن settings.gradle
-          M=$(find . -name "settings.gradle" -not -path "./.git/*" | head -1)
-          [ -n "$M" ] && cp "$M" settings.gradle
-
-          # پیدا کردن gradle.properties
-          M=$(find . -name "gradle.properties" -not -path "./.git/*" | head -1)
-          [ -n "$M" ] && cp "$M" gradle.properties
-
-          echo "===== STRUCTURE AFTER REORGANIZE ====="
-          find . -type f -not -path "./.git/*" | sort
-          echo "===== app/src/main ====="
-          find app/src/main -type f 2>/dev/null || echo "EMPTY"
-
-      - name: Verify all required files exist
+      - name: Create missing root build.gradle
         run: |
-          echo "Checking required files..."
+          cat > build.gradle << 'EOF'
+          buildscript {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:8.2.2'
+              }
+          }
+
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          EOF
+          echo "=== build.gradle created ==="
+          cat build.gradle
+
+      - name: Create missing settings.gradle if needed
+        run: |
+          if [ ! -f settings.gradle ]; then
+            cat > settings.gradle << 'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "OilQuizApp"
+          include ':app'
+          EOF
+            echo "=== settings.gradle created ==="
+          else
+            echo "=== settings.gradle already exists ==="
+          fi
+
+      - name: Create missing gradle.properties if needed
+        run: |
+          if [ ! -f gradle.properties ]; then
+            cat > gradle.properties << 'EOF'
+          android.useAndroidX=true
+          android.enableJetifier=true
+          org.gradle.jvmargs=-Xmx2048m
+          EOF
+            echo "=== gradle.properties created ==="
+          else
+            echo "=== gradle.properties already exists ==="
+          fi
+
+      - name: Create missing app/build.gradle if needed
+        run: |
+          if [ ! -f app/build.gradle ]; then
+            cat > app/build.gradle << 'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+
+          android {
+              namespace 'com.ahvaz.oilquiz'
+              compileSdk 34
+
+              defaultConfig {
+                  applicationId "com.ahvaz.oilquiz"
+                  minSdk 21
+                  targetSdk 34
+                  versionCode 1
+                  versionName "1.0"
+              }
+
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                  }
+              }
+
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+          }
+
+          dependencies {
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+              implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+          }
+          EOF
+            echo "=== app/build.gradle created ==="
+          else
+            echo "=== app/build.gradle already exists ==="
+          fi
+
+      - name: Verify all files
+        run: |
           REQUIRED="app/build.gradle build.gradle settings.gradle gradle.properties app/src/main/AndroidManifest.xml app/src/main/java/com/ahvaz/oilquiz/MainActivity.java app/src/main/res/layout/activity_main.xml app/src/main/res/values/strings.xml app/src/main/res/values/themes.xml app/src/main/assets/index.html"
           MISSING=0
           for f in $REQUIRED; do
@@ -90,7 +164,7 @@ jobs:
             fi
           done
           if [ $MISSING -gt 0 ]; then
-            echo "===== $MISSING فایل گم شده ====="
+            echo "===== $MISSING missing files ====="
             exit 1
           fi
 
