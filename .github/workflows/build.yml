@@ -12,41 +12,93 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Fix file structure
-        run: |
-          echo "===== Before ====="
-          ls -la
-          ls -la .github/workflows/ || true
-          
-          if [ -d ".github/workflows/app" ]; then
-            mv .github/workflows/app ./app
-          fi
-          if [ -f ".github/workflows/build.gradle" ]; then
-            mv .github/workflows/build.gradle ./build.gradle
-          fi
-          if [ -f ".github/workflows/settings.gradle" ]; then
-            mv .github/workflows/settings.gradle ./settings.gradle
-          fi
-          if [ -f ".github/workflows/gradle.properties" ]; then
-            mv .github/workflows/gradle.properties ./gradle.properties
-          fi
-          
-          echo "===== After ====="
-          ls -la
-          ls -la app/ || true
-          ls -la app/src/main/ || true
-
       - name: Setup Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Show current structure
+        run: |
+          echo "===== ALL FILES ====="
+          find . -type f -not -path "./.git/*" | sort
+
+      - name: Reorganize files to correct locations
+        run: |
+          # ساخت پوشه‌های مقصد
+          mkdir -p app/src/main/java/com/ahvaz/oilquiz
+          mkdir -p app/src/main/res/layout
+          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/assets
+
+          # پیدا کردن و کپی کردن AndroidManifest.xml
+          M=$(find . -name "AndroidManifest.xml" -not -path "./.git/*" | head -1)
+          [ -n "$M" ] && cp "$M" app/src/main/AndroidManifest.xml
+
+          # پیدا کردن و کپی کردن MainActivity.java
+          M=$(find . -name "MainActivity.java" -not -path "./.git/*" | head -1)
+          [ -n "$M" ] && cp "$M" app/src/main/java/com/ahvaz/oilquiz/MainActivity.java
+
+          # پیدا کردن و کپی کردن activity_main.xml
+          M=$(find . -name "activity_main.xml" -not -path "./.git/*" | head -1)
+          [ -n "$M" ] && cp "$M" app/src/main/res/layout/activity_main.xml
+
+          # پیدا کردن و کپی کردن strings.xml
+          M=$(find . -name "strings.xml" -not -path "./.git/*" | head -1)
+          [ -n "$M" ] && cp "$M" app/src/main/res/values/strings.xml
+
+          # پیدا کردن و کپی کردن themes.xml
+          M=$(find . -name "themes.xml" -not -path "./.git/*" | head -1)
+          [ -n "$M" ] && cp "$M" app/src/main/res/values/themes.xml
+
+          # پیدا کردن و کپی کردن index.html
+          M=$(find . -name "index.html" -not -path "./.git/*" | head -1)
+          [ -n "$M" ] && cp "$M" app/src/main/assets/index.html
+
+          # پیدا کردن app/build.gradle (فایلی که شامل com.android.application است)
+          M=$(grep -rl "com.android.application" --include="build.gradle" . 2>/dev/null | head -1)
+          [ -n "$M" ] && cp "$M" app/build.gradle
+
+          # پیدا کردن build.gradle ریشه (فایلی که شامل com.android.application نیست)
+          M=$(grep -rL "com.android.application" --include="build.gradle" . 2>/dev/null | grep -v "./.git" | head -1)
+          [ -n "$M" ] && cp "$M" build.gradle
+
+          # پیدا کردن settings.gradle
+          M=$(find . -name "settings.gradle" -not -path "./.git/*" | head -1)
+          [ -n "$M" ] && cp "$M" settings.gradle
+
+          # پیدا کردن gradle.properties
+          M=$(find . -name "gradle.properties" -not -path "./.git/*" | head -1)
+          [ -n "$M" ] && cp "$M" gradle.properties
+
+          echo "===== STRUCTURE AFTER REORGANIZE ====="
+          find . -type f -not -path "./.git/*" | sort
+          echo "===== app/src/main ====="
+          find app/src/main -type f 2>/dev/null || echo "EMPTY"
+
+      - name: Verify all required files exist
+        run: |
+          echo "Checking required files..."
+          REQUIRED="app/build.gradle build.gradle settings.gradle gradle.properties app/src/main/AndroidManifest.xml app/src/main/java/com/ahvaz/oilquiz/MainActivity.java app/src/main/res/layout/activity_main.xml app/src/main/res/values/strings.xml app/src/main/res/values/themes.xml app/src/main/assets/index.html"
+          MISSING=0
+          for f in $REQUIRED; do
+            if [ -f "$f" ]; then
+              echo "✅ $f"
+            else
+              echo "❌ MISSING: $f"
+              MISSING=$((MISSING+1))
+            fi
+          done
+          if [ $MISSING -gt 0 ]; then
+            echo "===== $MISSING فایل گم شده ====="
+            exit 1
+          fi
+
+      - name: Create local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
+
       - name: Build APK
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          echo "sdk.dir=$ANDROID_HOME" > local.properties
           gradle wrapper --gradle-version 8.4
           chmod +x ./gradlew
           ./gradlew assembleDebug --no-daemon
