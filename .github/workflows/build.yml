@@ -1,106 +1,218 @@
-name: Build APK
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>کوییز دانشکده نفت اهواز</title>
+<style>
+:root{--bg:#0d1b2a;--card:#1b263b;--card2:#22304a;--accent:#ffb703;--accent2:#fb8500;--green:#2ecc71;--red:#e74c3c;--text:#e0e1dd;--muted:#8d99ae}
+html.light{--bg:#f5f7fa;--card:#fff;--card2:#f0f4f8;--accent:#d97706;--accent2:#b45309;--green:#16a34a;--red:#dc2626;--text:#1a202c;--muted:#64748b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+body{font-family:Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;justify-content:center;padding:10px;min-height:100vh;transition:.3s}
+#app{width:100%;max-width:560px}
+.screen{display:none;background:var(--card);border-radius:20px;padding:20px 16px;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.screen.active{display:block}
+.brand{text-align:center;padding:18px;border-radius:16px;background:var(--card2);margin-bottom:14px;position:relative}
+.oil{width:70px;height:70px;margin:0 auto 6px}
+.bt{font-size:18px;font-weight:bold;color:var(--accent)}
+.bs{font-size:12px;color:var(--muted);margin-top:4px}
+.tb,.sb{position:absolute;top:10px;width:40px;height:40px;border-radius:50%;background:rgba(255,183,3,.15);border:1px solid rgba(255,183,3,.3);color:var(--accent);font-size:18px;cursor:pointer;padding:0}
+.tb{left:10px}.sb{right:10px}
+h2{font-size:16px;text-align:center;margin-bottom:12px;color:var(--accent)}
+h3{font-size:13px;color:var(--accent);margin:14px 0 6px}
+button{width:100%;padding:14px;margin:6px 0;border:none;border-radius:12px;background:var(--card2);color:var(--text);font-size:14.5px;font-family:inherit;cursor:pointer;font-weight:500;transition:.15s}
+button:active{transform:scale(.97)}
+.bp{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0d1b2a;font-weight:bold;font-size:15.5px}
+html.light .bp{color:#fff}
+.bg2{background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;font-weight:bold}
+.bd{background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;font-weight:bold}
+.bb{text-align:center;background:rgba(255,183,3,.1);border:1px dashed rgba(255,183,3,.4);padding:7px;border-radius:10px;margin-bottom:10px;font-size:11.5px;color:var(--accent)}
+.lt{display:flex;gap:6px;margin-bottom:14px}
+.lt button{flex:1;padding:9px;font-size:11.5px;margin:0;background:var(--card2);border-radius:10px}
+.lt button.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0d1b2a;font-weight:bold}
+html.light .lt button.active{color:#fff}
+.sg{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
+.st{aspect-ratio:1;border-radius:10px;background:var(--card2);border:2px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:15px;font-weight:bold;cursor:pointer;padding:2px}
+.st.locked{opacity:.35;cursor:not-allowed}
+.st.locked::after{content:"🔒";position:absolute}
+.st.passed{background:rgba(46,204,113,.25);border-color:var(--green);color:var(--green)}
+.st.current{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,183,3,.2)}
+.st .n{font-size:13px}
+.st .p{font-size:9px;color:var(--muted);margin-top:3px}
+.tb2{display:flex;justify-content:space-between;margin-bottom:10px;font-size:11.5px;color:var(--muted)}
+.pill{background:var(--card2);padding:5px 11px;border-radius:20px;font-weight:bold;color:var(--accent)}
+.pb{height:5px;background:var(--card2);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.pf{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;transition:.3s}
+.ct{display:inline-block;font-size:10.5px;background:rgba(255,183,3,.12);color:var(--accent);padding:3px 9px;border-radius:12px;margin-bottom:10px}
+.qt{font-size:15px;line-height:1.85;margin-bottom:16px;padding:14px;background:var(--card2);border-radius:12px;border-right:3px solid var(--accent);min-height:70px;display:flex;align-items:center}
+.ob{background:var(--card2);text-align:right;padding:12px 42px 12px 14px;font-size:13.5px;border-radius:11px;border:2px solid transparent;position:relative;display:block}
+.ol{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:6px;background:rgba(255,183,3,.12);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold}
+.ob.correct{background:rgba(46,204,113,.2)!important;border-color:var(--green);color:var(--green)}
+.ob.correct .ol{background:var(--green);color:#fff}
+.ob.wrong{background:rgba(231,76,60,.2)!important;border-color:var(--red);color:var(--red)}
+.ob.wrong .ol{background:var(--red);color:#fff}
+.ri{font-size:52px;text-align:center;margin:8px 0}
+.rs{text-align:center;font-size:38px;font-weight:bold;color:var(--accent);margin:6px 0}
+.rm{text-align:center;font-size:13.5px;line-height:1.85;margin-bottom:16px}
+.sg2{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:14px}
+.sb2{background:var(--card2);padding:10px;border-radius:11px;text-align:center}
+.sn{font-size:18px;font-weight:bold;color:var(--accent)}
+.sl{font-size:10px;color:var(--muted);margin-top:3px}
+.fn{text-align:center;font-size:9.5px;color:var(--muted);margin-top:14px;line-height:1.9;padding:10px;border-top:1px solid rgba(255,183,3,.15)}
+.h{display:none!important}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="start" class="screen active">
+<div class="brand">
+<button class="tb" onclick="theme()">☀️</button>
+<button class="sb" onclick="snd()">🔊</button>
+<svg class="oil" viewBox="0 0 100 100"><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffb703"/><stop offset="100%" stop-color="#fb8500"/></linearGradient></defs><polygon points="50,10 42,35 58,35" fill="url(#g1)"/><rect x="46" y="35" width="8" height="20" fill="url(#g1)"/><line x1="42" y1="35" x2="30" y2="55" stroke="url(#g1)" stroke-width="2"/><line x1="58" y1="35" x2="70" y2="55" stroke="url(#g1)" stroke-width="2"/><line x1="38" y1="45" x2="62" y2="45" stroke="url(#g1)" stroke-width="1.5"/><ellipse cx="50" cy="62" rx="30" ry="6" fill="#1a1a1a"/><ellipse cx="50" cy="65" rx="32" ry="7" fill="url(#g1)" opacity=".8"/><path d="M 50 75 Q 44 82 44 86 Q 44 91 50 91 Q 56 91 56 86 Q 56 82 50 75 Z" fill="url(#g1)"/></svg>
+<div class="bt">کوییز دانشکده نفت اهواز</div>
+<div class="bs">نفت • گاز • پالایش • پتروشیمی</div>
+</div>
+<div id="bb" class="bb h"></div>
+<div style="text-align:center;font-size:12px;margin-bottom:8px;">بانک: <strong id="bks" style="color:var(--accent)">0</strong> سوال</div>
+<h2>۱۰۰ مرحله • ۴ سطح</h2>
+<button class="bp" onclick="goStages(1)">🚀 شروع / ادامهٔ بازی</button>
+<button onclick="goStats()">📊 آمار و رکوردها</button>
+<button onclick="rst()" style="background:transparent;color:var(--muted);font-size:12px;">🔄 ریست پیشرفت</button>
+<div class="fn">کوییز دانشکده نفت اهواز • نسخه ۸.۰<br>تمامی حقوق مادی و معنوی متعلق به مرکز فناوری اطلاعات و ارتباطات دانشکده نفت اهواز می‌باشد.</div>
+</div>
+<div id="stages" class="screen"><h2>مرحله را انتخاب کن</h2><div class="lt" id="lt"></div><div class="sg" id="sg"></div><button onclick="home()">← بازگشت</button></div>
+<div id="quiz" class="screen">
+<div class="tb2"><span class="pill" id="sp">امتیاز: 0</span><span id="qc">سوال ۱ از ۱۰</span></div>
+<div class="pb"><div class="pf" id="pf"></div></div>
+<span class="ct" id="ct">...</span>
+<div class="qt" id="qt">...</div>
+<div id="ob"></div>
+<button id="nb" class="bp h" onclick="nextQ()">سوال بعدی ←</button>
+<button onclick="quit()" style="background:transparent;color:var(--muted);font-size:11.5px;margin-top:8px;">انصراف</button>
+</div>
+<div id="result" class="screen">
+<div class="ri" id="ri">🏆</div>
+<div class="rs" id="rs">0</div>
+<div class="rm" id="rm"></div>
+<div class="sg2"><div class="sb2"><div class="sn" id="sc">0</div><div class="sl">صحیح</div></div><div class="sb2"><div class="sn" id="sw">0</div><div class="sl">غلط</div></div><div class="sb2"><div class="sn" id="spc">0%</div><div class="sl">درصد</div></div></div>
+<div id="rb"></div>
+</div>
+<div id="stats" class="screen"><h2>📊 آمار شما</h2><div id="stc"></div><button onclick="home()">← بازگشت</button></div>
+</div>
 
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+<script>
+// صدا
+var ac=null,se=true;
+try{var s=localStorage.getItem('oqs');if(s!==null)se=s==='true'}catch(e){}
+function ia(){if(!ac){try{ac=new(window.AudioContext||window.webkitAudioContext)()}catch(e){}}}
+function pt(f,d,t,v){if(!se)return;ia();if(!ac)return;try{var o=ac.createOscillator(),g=ac.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||.15,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+function sOK(){setTimeout(function(){pt(523.25,.15,'sine',.18)},0);setTimeout(function(){pt(659.25,.15,'sine',.18)},100);setTimeout(function(){pt(783.99,.3,'sine',.18)},200)}
+function sNO(){pt(220,.2,'sawtooth',.12);setTimeout(function(){pt(165,.3,'sawtooth',.12)},150)}
+function sCL(){pt(800,.05,'sine',.08)}
+function sWN(){[523.25,659.25,783.99,1046.5].forEach(function(f,i){setTimeout(function(){pt(f,.25,'sine',.2)},i*120)})}
+function sFL(){[392,349.23,293.66,261.63].forEach(function(f,i){setTimeout(function(){pt(f,.3,'triangle',.15)},i*150)})}
+function snd(){se=!se;try{localStorage.setItem('oqs',se)}catch(e){}document.querySelectorAll('.sb').forEach(function(b){b.textContent=se?'🔊':'🔇'});if(se){ia();sCL()}}
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+// تم
+var th='dark';
+try{var t=localStorage.getItem('oqt');if(t)th=t}catch(e){}
+function apT(){document.documentElement.classList.toggle('light',th==='light');document.querySelectorAll('.tb').forEach(function(b){b.textContent=th==='light'?'🌙':'☀️'})}
+function theme(){th=th==='dark'?'light':'dark';try{localStorage.setItem('oqt',th)}catch(e){}apT();sCL()}
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+// بانک سوالات
+var BK=[];
+function aQ(l,c,q,o,a){if(!o||o.length!==4||a<0||a>3)return;var k=q+'|'+o.join('|');for(var i=0;i<BK.length;i++)if(BK[i].k===k)return;BK.push({l:l,c:c,q:q,o:o,a:a,k:k})}
+function sh(a){var x=a.slice();for(var i=x.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=x[i];x[i]=x[j];x[j]=t}return x}
 
-      - name: Prepare module structure
-        run: |
-          mkdir -p oilquiz/src/main/java/com/ahvaz/oilquiz
-          mkdir -p oilquiz/src/main/res/layout
-          mkdir -p oilquiz/src/main/res/values
-          mkdir -p oilquiz/src/main/res/drawable
-          mkdir -p oilquiz/src/main/assets
+// داده‌ها
+var AL=[['متان','CH₄'],['اتان','C₂H₆'],['پروپان','C₃H₈'],['بوتان','C₄H₁₀'],['پنتان','C₅H₁₂'],['هکسان','C₆H₁₄'],['هپتان','C₇H₁₆'],['اکتان','C₈H₁₈'],['نونان','C₉H₂₀'],['دکان','C₁₀H₂₂']];
+var AC=[['BOP','Blowout Preventer','پیشگیری از فوران چاه'],['FCC','Fluid Catalytic Cracking','کراکینگ کاتالیستی'],['EOR','Enhanced Oil Recovery','ازدیاد برداشت'],['HSE','Health Safety Environment','بهداشت و ایمنی'],['MSDS','Material Safety Data Sheet','برگه اطلاعات ایمنی'],['LNG','Liquefied Natural Gas','گاز طبیعی مایع'],['LPG','Liquefied Petroleum Gas','گاز مایع نفتی'],['CNG','Compressed Natural Gas','گاز فشرده'],['NGL','Natural Gas Liquids','مایعات گازی'],['API','American Petroleum Institute','انجمن نفت آمریکا'],['OPEC','Organization of Petroleum Exporting Countries','اوپک'],['GOR','Gas Oil Ratio','نسبت گاز به نفت'],['ROP','Rate of Penetration','سرعت نفوذ مته'],['TVD','True Vertical Depth','عمق قائم'],['WOB','Weight On Bit','وزن روی مته'],['ESP','Electric Submersible Pump','پمپ درون‌چاهی'],['SAGD','Steam Assisted Gravity Drainage','زهکشی با بخار'],['WAG','Water Alternating Gas','تزریق متناوب آب و گاز'],['HDS','Hydrodesulfurization','هیدروگوگردزدایی'],['SRU','Sulfur Recovery Unit','واحد بازیافت گوگرد']];
+var PC=[['اتیلن','پلی‌اتیلن (PE)'],['پروپیلن','پلی‌پروپیلن (PP)'],['وینیل کلراید','پلی‌وینیل کلراید (PVC)'],['استایرن','پلی‌استایرن (PS)'],['بوتادین و استایرن','لاستیک SBR'],['اتیلن گلیکول + ترفتالیک','پلی‌اتیلن ترفتالات (PET)'],['تترافلوئورواتیلن','تفلون (PTFE)'],['متیل متاکریلات','پلکسی (PMMA)'],['کاپرولاکتام','نایلون ۶'],['ایزوسیانات + پلی‌اُل','پلی‌یورتان']];
+var CN=[['ونزوئلا','آمریکای جنوبی'],['عربستان','خاورمیانه'],['کانادا','آمریکای شمالی'],['ایران','خاورمیانه'],['عراق','خاورمیانه'],['کویت','خاورمیانه'],['امارات','خاورمیانه'],['روسیه','اوراسیا'],['لیبی','آفریقا'],['نیجریه','آفریقا'],['قطر','خاورمیانه'],['چین','آسیا'],['نروژ','اروپا']];
+var FD=[['غوار','عربستان'],['بورگان','کویت'],['اهواز','ایران'],['گچساران','ایران'],['مارون','ایران'],['آغاجاری','ایران'],['کرنج','ایران'],['پارسی','ایران'],['شمال/جنوب پارس','ایران و قطر'],['کانتارل','مکزیک'],['تنگیز','قزاقستان'],['ساموتلور','روسیه'],['کرکوک','عراق'],['زاکوم','امارات'],['رُمیله','عراق']];
+var GS=[['متان','CH₄'],['اتان','C₂H₆'],['پروپان','C₃H₈'],['بوتان','C₄H₁₀'],['هیدروژن','H₂'],['هلیم','He'],['نیتروژن','N₂'],['اکسیژن','O₂'],['دی‌اکسید کربن','CO₂'],['مونوکسید کربن','CO'],['سولفید هیدروژن','H₂S'],['آمونیاک','NH₃']];
+var RF=[['آبادان','ایران'],['تهران','ایران'],['اصفهان','ایران'],['بندرعباس','ایران'],['اراک','ایران'],['تبریز','ایران'],['شیراز','ایران'],['جامناگر','هند'],['جورونگ','سنگاپور'],['روتردام','هلند']];
 
-      - name: Copy all source files
-        run: |
-          cp index.html oilquiz/src/main/assets/index.html
-          cp AndroidManifest.xml oilquiz/src/main/AndroidManifest.xml
-          cp MainActivity.java oilquiz/src/main/java/com/ahvaz/oilquiz/MainActivity.java
-          cp activity_main.xml oilquiz/src/main/res/layout/activity_main.xml
-          cp strings.xml oilquiz/src/main/res/values/strings.xml
-          cp themes.xml oilquiz/src/main/res/values/themes.xml
-          cp ic_oil.xml oilquiz/src/main/res/drawable/ic_oil.xml
-          echo "--- files copied ---"
-          find oilquiz -type f
+// سوالات دست‌نویس
+var MN=[
+[1,'عمومی','نفت خام عمدتاً از چه عناصری تشکیل شده؟',['کربن و هیدروژن','اکسیژن و نیتروژن','گوگرد و فسفر','آهن و کربن'],0],
+[1,'عمومی','واحد بین‌المللی حجم نفت؟',['تن','بشکه','متر مکعب','گالن'],1],
+[1,'پالایش','کدام فرآورده سبک‌تر است؟',['قیر','نفت کوره','بنزین','روغن موتور'],2],
+[1,'شیمی نفت','فرمول متان؟',['C₂H₆','C₃H₈','CH₄','C₄H₁₀'],2],
+[1,'جغرافیا','بیشترین میادین نفتی ایران در کدام استان؟',['خوزستان','بوشهر','هرمزگان','تهران'],0],
+[1,'عمومی','یک بشکه نفت چند لیتر؟',['۱۰۰','۲۰۰','۱۵۹','۵۰'],2],
+[1,'ایمنی','بوی H₂S شبیه چیست؟',['بی‌بو','شیرین','بنزین','تخم‌مرغ گندیده'],3],
+[1,'حفاری','لوله جلوگیری از ریزش چاه؟',['Casing','Tubing','Drill Pipe','Kelly'],0],
+[1,'عمومی','بزرگ‌ترین میدان نفتی جهان؟',['اهواز','غوار','نوروز','بورگان'],1],
+[1,'عمومی','مهم‌ترین کاربرد گاز طبیعی؟',['سوخت نیروگاه','تولید کاغذ','رنگ','دارو'],0],
+[2,'حفاری','وظیفه اصلی گل حفاری؟',['خنک کردن مته و حمل کنده‌ها','رنگ‌آمیزی چاه','افزایش وزن دکل','روغن‌کاری'],0],
+[2,'حفاری','BOP مخفف چیست؟',['Bottom Oil Pump','Blowout Preventer','Basic Operating Platform','Borehole Output Pipe'],1],
+[2,'حفاری','ماده اصلی گل پایه آبی؟',['روغن دیزل','آب و بنتونیت','الکل','گازوئیل'],1],
+[2,'حفاری','باریت در گل چه می‌کند؟',['افزایش وزن گل','کاهش ویسکوزیته','خوشبو کردن','رنگ‌آمیزی'],0],
+[2,'بهره‌برداری','Water Flooding چیست؟',['تزریق آب به مخزن','شستشو','تزریق بخار','کاهش فشار'],0],
+[2,'بهره‌برداری','Gas Lift چه می‌کند؟',['جداسازی گاز','تزریق گاز به ستون سیال','سرد کردن چاه','افزایش فشار'],1],
+[2,'پالایش','هدف ریفرمینگ کاتالیستی؟',['افزایش اکتان بنزین','کاهش گوگرد','تولید قیر','افزایش نفت کوره'],0],
+[2,'زمین‌شناسی','تخلخل چیست؟',['نسبت حجم حفرات به حجم کل','وزن مخصوص','سختی','رنگ'],0],
+[2,'زمین‌شناسی','تراوایی چه نشان می‌دهد؟',['سختی','چگالی','توانایی عبور سیال','رنگ'],2],
+[2,'زمین‌شناسی','رایج‌ترین تله نفتی؟',['چینه‌ای','ساختمانی (آنتیکلاین)','گنبد نمکی','هیدرودینامیکی'],1],
+[3,'پالایش','هیدروکراکینگ چیست؟',['شکستن هیدروکربن سنگین با هیدروژن','افزودن آب','تقطیر خلأ','تبدیل گاز به مایع'],0],
+[3,'پالایش','کک نفتی در کدام فرآیند؟',['کک‌سازی تأخیری','تقطیر اتمسفریک','ریفرمینگ','آلکیلاسیون'],0],
+[3,'پالایش','عدد اکتان چیست؟',['میزان گوگرد','مقاومت به کوبش','چگالی','رنگ'],1],
+[3,'شیمی نفت','عامل بوی نامطبوع نفت؟',['آلکان‌ها','مرکاپتان‌ها','آروماتیک‌ها','آب'],1],
+[3,'ایمنی','حد مواجهه ۸ ساعته H₂S؟',['حدود ۱۰ ppm','حدود ۱۰۰ ppm','حدود ۵۰۰ ppm','محدودیتی ندارد'],0],
+[4,'زمین‌شناسی','کروژن چیست؟',['ماده آلی سنگ منشأ','نوعی گاز','نمک','سیال حفاری'],0],
+[4,'عمومی','اوپک در چه سالی تأسیس شد؟',['۱۹۶۰','۱۹۴۵','۱۹۷۳','۱۹۸۰'],0],
+[4,'عمومی','بزرگ‌ترین پالایشگاه ایران؟',['آبادان','تهران','اصفهان','بندرعباس'],0],
+[4,'عمومی','تفاوت نفت شیرین و ترش؟',['میزان گوگرد','رنگ','چگالی','سن'],0]
+];
+MN.forEach(function(h){aQ(h[0],h[1],h[2],h[3],h[4])});
 
-      - name: Write root build.gradle
-        run: |
-          echo "buildscript {" > build.gradle
-          echo "    repositories { google(); mavenCentral() }" >> build.gradle
-          echo "    dependencies { classpath 'com.android.tools.build:gradle:8.2.2' }" >> build.gradle
-          echo "}" >> build.gradle
-          echo "allprojects { repositories { google(); mavenCentral() } }" >> build.gradle
+// Generatorها
+function gAL(){AL.forEach(function(a){var oF=[],oN=[];AL.forEach(function(x){if(x[0]!==a[0]){oF.push(x[1]);oN.push(x[0])}});var r=ok(a[1],oF);if(r)aQ('شیمی نفت','فرمول «'+a[0]+'»؟',r.o,r.a);r=ok(a[0],oN);if(r)aQ('شیمی نفت','نام «'+a[1]+'»؟',r.o,r.a);var wC=[a[0].length>0?a[0]:''],nums=[1,2,3,4,5,6,7,8,9,10];var n=a[0]==='متان'?1:a[0]==='اتان'?2:a[0]==='پروپان'?3:a[0]==='بوتان'?4:a[0]==='پنتان'?5:a[0]==='هکسان'?6:a[0]==='هپتان'?7:a[0]==='اکتان'?8:a[0]==='نونان'?9:10;var wN=nums.filter(function(x){return x!==n}).map(String);r=ok(String(n),wN);if(r)aQ('شیمی نفت',a[0]+' چند کربن دارد؟',r.o,r.a)})}
+function ok(c,w){var u=[],i;for(i=0;i<w.length;i++)if(w[i]!==c&&u.indexOf(w[i])<0)u.push(w[i]);if(u.length<3)return null;var p=sh(u).slice(0,3);var opts=sh([c].concat(p));return{o:opts,a:opts.indexOf(c)}}
+function gAC(){AC.forEach(function(a){var oE=[],oP=[];AC.forEach(function(x){if(x[0]!==a[0]){oE.push(x[1]);oP.push(x[2])}});var r=ok(a[1],oE);if(r)aQ('اختصارات','«'+a[0]+'» چیست؟',r.o,r.a);r=ok(a[2],oP);if(r)aQ('اختصارات','معادل «'+a[0]+'»؟',r.o,r.a)})}
+function gPC(){PC.forEach(function(p){var oM=[],oP=[];PC.forEach(function(x){if(x[1]!==p[1]){oM.push(x[0]);oP.push(x[1])}});var r=ok(p[1],oP);if(r)aQ('پتروشیمی','مونومر «'+p[0]+'»؟',r.o,r.a);r=ok(p[0],oM);if(r)aQ('پتروشیمی','پلیمر «'+p[1]+'»؟',r.o,r.a)})}
+function gCN(){CN.forEach(function(c){var oC=[];CN.forEach(function(x){if(x[1]!==c[1]&&oC.indexOf(x[1])<0)oC.push(x[1])});var r=ok(c[1],oC);if(r)aQ('جغرافیا','کشور «'+c[0]+'» در کدام قاره/منطقه؟',r.o,r.a)})}
+function gFD(){FD.forEach(function(f){var oC=[];FD.forEach(function(x){if(x[1]!==f[1]&&oC.indexOf(x[1])<0)oC.push(x[1])});var r=ok(f[1],oC);if(r)aQ('میادین نفتی','میدان «'+f[0]+'»؟',r.o,r.a)})}
+function gGS(){var names=[],forms=[];GS.forEach(function(g){names.push(g[0]);forms.push(g[1])});GS.forEach(function(g){var oF=forms.filter(function(x){return x!==g[1]});var r=ok(g[1],oF);if(r)aQ('شیمی نفت','فرمول «'+g[0]+'»؟',r.o,r.a);var oN=names.filter(function(x){return x!==g[0]});r=ok(g[0],oN);if(r)aQ('شیمی نفت','نام «'+g[1]+'»؟',r.o,r.a)})}
+function gRF(){RF.forEach(function(r){var oC=[];RF.forEach(function(x){if(x[1]!==r[1]&&oC.indexOf(x[1])<0)oC.push(x[1])});var rr=ok(r[1],oC);if(rr)aQ('پالایش','پالایشگاه «'+r[0]+'»؟',rr.o,rr.a)})}
+function gEQ(){var eq=[['Separator','جداسازی نفت، گاز و آب'],['Heat Exchanger','تبادل حرارت'],['Furnace','گرم کردن سیال'],['Condenser','مایع کردن بخار'],['Compressor','فشرده کردن گاز'],['Pump','افزایش فشار مایع'],['Valve','کنترل جریان'],['Reactor','واکنش شیمیایی'],['Scrubber','حذف گازهای اسیدی'],['Desalter','حذف نمک از نفت']];var ds=eq.map(function(x){return x[1]});eq.forEach(function(e){var w=ds.filter(function(x){return x!==e[1]});var r=ok(e[1],w);if(r)aQ('تجهیزات','کاربرد «'+e[0]+'»؟',r.o,r.a)})}
+function gEOR(){var eor=[['Water Flooding','تزریق آب'],['CO₂ Flooding','تزریق دی‌اکسید کربن'],['Polymer Flooding','تزریق پلیمر'],['Steam Injection','تزریق بخار'],['SAGD','زهکشی ثقلی با بخار'],['CSS','تحریک چرخه‌ای بخار'],['WAG','تزریق متناوب آب و گاز']];var ds=eor.map(function(x){return x[1]});eor.forEach(function(e){var w=ds.filter(function(x){return x!==e[1]});var r=ok(e[1],w);if(r)aQ('بهره‌برداری','روش «'+e[0]+'»؟',r.o,r.a)})}
+function gMI(){var qs=[['گاز شوی برای چه؟','حذف گازهای اسیدی',['حذف آب','حذف گوگرد','فشرده‌سازی']],['نم‌گیری گاز با چه؟','TEG',['آب','الکل','اسید']],['مهم‌ترین جزء گاز شیرین؟','متان',['اتان','پروپان','CO₂']],['گاز ترش چیست؟','حاوی H₂S و CO₂',['رطوبت بالا','گرم','پرفشار']],['هدف واحد SRU؟','بازیافت گوگرد',['تولید گاز','حذف آب','فشرده‌سازی']],['واحد الفین برای؟','اتیلن و پروپیلن',['متانول','اوره','بنزین']]];qs.forEach(function(q){var r=ok(q[1],q[2]);if(r)aQ('فرآیندها',q[0],r.o,r.a)})}
 
-      - name: Write settings.gradle
-        run: |
-          echo "pluginManagement {" > settings.gradle
-          echo "    repositories { google(); mavenCentral(); gradlePluginPortal() }" >> settings.gradle
-          echo "}" >> settings.gradle
-          echo "dependencyResolutionManagement {" >> settings.gradle
-          echo "    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)" >> settings.gradle
-          echo "    repositories { google(); mavenCentral() }" >> settings.gradle
-          echo "}" >> settings.gradle
-          echo 'rootProject.name = "OilQuizAhvaz"' >> settings.gradle
-          echo "include ':oilquiz'" >> settings.gradle
+gAL();gAC();gPC();gCN();gFD();gGS();gRF();gEQ();gEOR();gMI();
 
-      - name: Write gradle.properties
-        run: |
-          echo "android.useAndroidX=true" > gradle.properties
-          echo "android.enableJetifier=true" >> gradle.properties
-          echo "org.gradle.jvmargs=-Xmx2048m" >> gradle.properties
+// توزیع یکتای سوالات
+var LP={};
+function gLP(l){if(!LP[l]){var p=BK.filter(function(q){return q.l===l});if(p.length<250&&l<4)p=p.concat(BK.filter(function(q){return q.l===l+1}).slice(0,250-p.length));if(p.length<250&&l>1)p=p.concat(BK.filter(function(q){return q.l===l-1}).slice(0,250-p.length));LP[l]=sh(p)}return LP[l]}
+function sL(id){if(id<=25)return 1;if(id<=50)return 2;if(id<=75)return 3;return 4}
+function sPS(id){return[60,70,75,80][sL(id)-1]}
+function gSQ(id){var l=sL(id);var idx=(id-1)%25;var pool=gLP(l);var st=(idx*10)%pool.length;var qs=[];for(var i=0;i<10;i++)qs.push(pool[(st+i)%pool.length]);return qs}
 
-      - name: Write oilquiz build.gradle
-        run: |
-          echo "plugins { id 'com.android.application' }" > oilquiz/build.gradle
-          echo "android {" >> oilquiz/build.gradle
-          echo "    namespace 'com.ahvaz.oilquiz'" >> oilquiz/build.gradle
-          echo "    compileSdk 34" >> oilquiz/build.gradle
-          echo "    defaultConfig {" >> oilquiz/build.gradle
-          echo "        applicationId 'com.ahvaz.oilquiz.v7'" >> oilquiz/build.gradle
-          echo "        minSdk 21" >> oilquiz/build.gradle
-          echo "        targetSdk 34" >> oilquiz/build.gradle
-          echo "        versionCode 7" >> oilquiz/build.gradle
-          echo "        versionName '7.0'" >> oilquiz/build.gradle
-          echo "    }" >> oilquiz/build.gradle
-          echo "    buildTypes { release { minifyEnabled false } }" >> oilquiz/build.gradle
-          echo "    compileOptions {" >> oilquiz/build.gradle
-          echo "        sourceCompatibility JavaVersion.VERSION_17" >> oilquiz/build.gradle
-          echo "        targetCompatibility JavaVersion.VERSION_17" >> oilquiz/build.gradle
-          echo "    }" >> oilquiz/build.gradle
-          echo "}" >> oilquiz/build.gradle
-          echo "dependencies {" >> oilquiz/build.gradle
-          echo "    implementation 'androidx.appcompat:appcompat:1.6.1'" >> oilquiz/build.gradle
-          echo "    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'" >> oilquiz/build.gradle
-          echo "}" >> oilquiz/build.gradle
+var KEY='ahvaz_oil_quiz_v8';
+function load(){try{var r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}return{stages:{},unlocked:1}}
+function save(p){try{localStorage.setItem(KEY,JSON.stringify(p))}catch(e){}}
 
-      - name: Show oilquiz build.gradle
-        run: cat oilquiz/build.gradle
+var S={stageId:null,questions:[],index:0,score:0,correct:0,wrong:0,answered:false,total:0};
+function show(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}
+function home(){show('start');rBB()}
+function rBB(){var p=load();var pl=0;Object.keys(p.stages).forEach(function(k){pl+=(p.stages[k].plays||0)});var box=document.getElementById('bb');if(pl>0){var best=0;Object.keys(p.stages).forEach(function(k){if((p.stages[k].bestScore||0)>best)best=p.stages[k].bestScore});box.classList.remove('h');box.innerHTML='🏆 بهترین: <strong>'+best+'</strong> • بازی‌ها: '+pl}else box.classList.add('h');document.getElementById('bks').textContent=BK.length}
+var aL=1;
+function goStages(l){aL=l||aL;rLT();rSG();show('stages')}
+function rLT(){var p=load();var box=document.getElementById('lt');box.innerHTML='';for(var l=1;l<=4;l++){(function(l){var btn=document.createElement('button');var first=(l-1)*25+1;btn.textContent=['🌱 ','⚙️ ','🏭 ','🎓 '][l-1]+first+'-'+l*25;if(l===aL)btn.classList.add('active');if(first>p.unlocked)btn.style.opacity='.5';btn.onclick=function(){aL=l;rLT();rSG();sCL()};box.appendChild(btn)})(l)}}
+function rSG(){var p=load();var grid=document.getElementById('sg');grid.innerHTML='';var first=(aL-1)*25+1;for(var id=first;id<=aL*25;id++){(function(id){var rec=p.stages[id]||{};var unlocked=id<=p.unlocked;var btn=document.createElement('div');btn.className='st';if(!unlocked)btn.classList.add('locked');else if(rec.passed)btn.classList.add('passed');else if(id===p.unlocked)btn.classList.add('current');btn.innerHTML='<div class="n">'+id+'</div>'+(rec.bestPercent?'<div class="p">'+rec.bestPercent+'٪</div>':'');if(unlocked)btn.onclick=function(){sCL();startS(id)};grid.appendChild(btn)})(id)}}
+function startS(id){var qs=gSQ(id);if(qs.length<10){alert('سوال کافی نیست');return}S.stageId=id;S.total=10;S.questions=qs.map(function(q){var paired=q.o.map(function(opt,i){return{opt:opt,ok:i===q.a}});var shuffled=sh(paired);return{cat:q.c,q:q.q,opts:shuffled.map(function(p){return p.opt}),ans:shuffled.findIndex(function(p){return p.ok})}});S.index=0;S.score=0;S.correct=0;S.wrong=0;S.answered=false;show('quiz');rQ()}
+function rQ(){var q=S.questions[S.index];S.answered=false;document.getElementById('sp').textContent='امتیاز: '+S.score;document.getElementById('qc').textContent='مرحله '+S.stageId+' • سوال '+(S.index+1)+'/'+S.total;document.getElementById('pf').style.width=(S.index/S.total*100)+'%';document.getElementById('ct').textContent=q.cat;document.getElementById('qt').textContent=q.q;var box=document.getElementById('ob');box.innerHTML='';var letters=['الف','ب','ج','د'];q.opts.forEach(function(opt,i){var btn=document.createElement('button');btn.className='ob';btn.innerHTML='<span class="ol">'+letters[i]+'</span>'+opt;btn.onclick=function(){sel(i)};box.appendChild(btn)});document.getElementById('nb').classList.add('h')}
+function sel(idx){if(S.answered)return;S.answered=true;var q=S.questions[S.index];var btns=document.querySelectorAll('#ob .ob');for(var i=0;i<btns.length;i++){btns[i].disabled=true;if(i===q.ans)btns[i].classList.add('correct');if(i===idx&&i!==q.ans)btns[i].classList.add('wrong')}if(idx===q.ans){S.score+=10;S.correct++;sOK()}else{S.wrong++;sNO()}document.getElementById('sp').textContent='امتیاز: '+S.score;var nb=document.getElementById('nb');nb.classList.remove('h');nb.textContent=(S.index===S.total-1)?'مشاهده نتیجه 🎯':'سوال بعدی ←'}
+function nextQ(){if(S.index<S.total-1){S.index++;rQ()}else finS()}
+function finS(){var total=S.total;var percent=Math.round(S.correct/total*100);var id=S.stageId;var ps=sPS(id);var passed=percent>=ps;var p=load();var rec=p.stages[id]||{bestScore:0,bestPercent:0,passed:false,plays:0};rec.plays=(rec.plays||0)+1;if(S.score>rec.bestScore)rec.bestScore=S.score;if(percent>rec.bestPercent)rec.bestPercent=percent;if(passed)rec.passed=true;p.stages[id]=rec;if(passed&&id===p.unlocked&&id<100)p.unlocked=id+1;save(p);var icon='📚',msg='';if(percent===100){icon='👑';msg='بی‌نقص!'}else if(percent>=90){icon='🏆';msg='فوق‌العاده!'}else if(percent>=75){icon='🥇';msg='عالی!'}else if(percent>=60){icon='🥈';msg='قابل قبول.'}else if(percent>=40){icon='🥉';msg='نیاز به مطالعه بیشتر.'}else{icon='📚';msg='منابع پایه را مرور کن.'}if(passed){msg='✅ مرحله '+id+' را پاس کردی!<br>'+msg;setTimeout(sWN,200)}else{msg='❌ حد قبولی: '+ps+'٪ — نمره تو: '+percent+'٪<br>'+msg;setTimeout(sFL,200)}document.getElementById('ri').textContent=icon;document.getElementById('rs').textContent=S.score;document.getElementById('rm').innerHTML=msg+'<br><span style="color:var(--muted);font-size:12px;">'+S.correct+' صحیح از '+total+'</span>';document.getElementById('sc').textContent=S.correct;document.getElementById('sw').textContent=S.wrong;document.getElementById('spc').textContent=percent+'%';var btns=document.getElementById('rb');btns.innerHTML='';var again=document.createElement('button');again.className='bp';again.textContent='🔁 تلاش مجدد';again.onclick=function(){startS(id)};btns.appendChild(again);if(passed&&id<100){var nxt=document.createElement('button');nxt.className='bg2';nxt.textContent='➡️ مرحله '+(id+1);nxt.onclick=function(){startS(id+1)};btns.appendChild(nxt)}var list=document.createElement('button');list.textContent='📋 لیست مراحل';list.onclick=function(){goStages(sL(id))};btns.appendChild(list);var h=document.createElement('button');h.textContent='🏠 منوی اصلی';h.onclick=home;btns.appendChild(h);show('result')}
+function quit(){if(confirm('انصراف؟'))goStages(aL)}
+function goStats(){var p=load();var all=[];Object.keys(p.stages).forEach(function(k){all.push(p.stages[k])});var pl=0,pc=0;all.forEach(function(x){pl+=(x.plays||0);if(x.passed)pc++});var avg=0;if(all.length){var sm=0;all.forEach(function(x){sm+=(x.bestPercent||0)});avg=Math.round(sm/all.length)}var lh='';for(var l=1;l<=4;l++){var c=0;for(var i=(l-1)*25+1;i<=l*25;i++)if(p.stages[i]&&p.stages[i].passed)c++;lh+='<div style="display:flex;justify-content:space-between;padding:9px 13px;background:var(--card2);border-radius:9px;margin:5px 0;font-size:12.5px;"><span>'+['🌱 پایه','⚙️ متوسط','🏭 پیشرفته','🎓 حرفه‌ای'][l-1]+'</span><span style="color:var(--accent);font-weight:bold;">'+c+'/25</span></div>'}document.getElementById('stc').innerHTML='<div class="sg2"><div class="sb2"><div class="sn">'+pc+'</div><div class="sl">پاس‌شده</div></div><div class="sb2"><div class="sn">'+pl+'</div><div class="sl">بازی</div></div><div class="sb2"><div class="sn">'+avg+'%</div><div class="sl">میانگین</div></div></div><div style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:10px;">بانک: <strong style="color:var(--accent);">'+BK.length+'</strong> سوال</div><h3>📈 پیشرفت</h3>'+lh+'<button class="bd" style="margin-top:16px;" onclick="rst(1)">🗑️ پاک کردن پیشرفت</button>';show('stats')}
+function rst(f){if(!confirm('آمار پاک شود؟'))return;localStorage.removeItem(KEY);if(f)goStats();else home()}
 
-      - name: Create local.properties
-        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
-
-      - name: Build APK
-        run: |
-          gradle wrapper --gradle-version 8.4
-          chmod +x ./gradlew
-          ./gradlew :oilquiz:assembleDebug --no-daemon
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: OilQuiz-APK-v7
-          path: oilquiz/build/outputs/apk/debug/*.apk
-          if-no-files-found: warn
+apT();
+document.querySelectorAll('.sb').forEach(function(b){b.textContent=se?'🔊':'🔇'});
+rBB();
+</script>
+</body>
+</html>
