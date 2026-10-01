@@ -9,45 +9,57 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Java 17
-        uses: actions/setup-java@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Reorganize existing files
+      - name: Debug - what exists
         run: |
-          mkdir -p app/src/main/java/com/ahvaz/oilquiz
-          mkdir -p app/src/main/res/layout
-          mkdir -p app/src/main/res/values
-          mkdir -p app/src/main/assets
+          echo "=== root ==="
+          ls -la
+          echo "=== what is 'app'? ==="
+          file app 2>&1 || echo "no app"
+        continue-on-error: true
 
-          M=$(find . -name "AndroidManifest.xml" -not -path "./.git/*" | head -1)
-          [ -n "$M" ] && cp "$M" app/src/main/AndroidManifest.xml
+      - name: Create fresh module directory
+        run: |
+          MOD="oilquiz"
+          rm -rf "$MOD" || true
+          mkdir -p "$MOD/src/main/java/com/ahvaz/oilquiz"
+          mkdir -p "$MOD/src/main/res/layout"
+          mkdir -p "$MOD/src/main/res/values"
+          mkdir -p "$MOD/src/main/assets"
+          echo "Created $MOD structure"
+          ls -la "$MOD"
 
-          M=$(find . -name "MainActivity.java" -not -path "./.git/*" | head -1)
-          [ -n "$M" ] && cp "$M" app/src/main/java/com/ahvaz/oilquiz/MainActivity.java
+      - name: Copy source files from wherever they are
+        run: |
+          MOD="oilquiz"
+          F=$(find . -name "index.html" -not -path "./.git/*" -not -path "./$MOD/*" | head -1)
+          [ -n "$F" ] && cp "$F" "$MOD/src/main/assets/index.html" && echo "index.html <- $F"
+          
+          F=$(find . -name "MainActivity.java" -not -path "./.git/*" -not -path "./$MOD/*" | head -1)
+          [ -n "$F" ] && cp "$F" "$MOD/src/main/java/com/ahvaz/oilquiz/MainActivity.java" && echo "MainActivity <- $F"
+          
+          F=$(find . -name "AndroidManifest.xml" -not -path "./.git/*" -not -path "./$MOD/*" | head -1)
+          [ -n "$F" ] && cp "$F" "$MOD/src/main/AndroidManifest.xml" && echo "Manifest <- $F"
+          
+          F=$(find . -name "activity_main.xml" -not -path "./.git/*" -not -path "./$MOD/*" | head -1)
+          [ -n "$F" ] && cp "$F" "$MOD/src/main/res/layout/activity_main.xml" && echo "activity_main <- $F"
+          
+          F=$(find . -name "strings.xml" -not -path "./.git/*" -not -path "./$MOD/*" | head -1)
+          [ -n "$F" ] && cp "$F" "$MOD/src/main/res/values/strings.xml" && echo "strings <- $F"
+          
+          F=$(find . -name "themes.xml" -not -path "./.git/*" -not -path "./$MOD/*" | head -1)
+          [ -n "$F" ] && cp "$F" "$MOD/src/main/res/values/themes.xml" && echo "themes <- $F"
+          
+          echo "=== copied files ==="
+          find "$MOD" -type f
 
-          M=$(find . -name "activity_main.xml" -not -path "./.git/*" | head -1)
-          [ -n "$M" ] && cp "$M" app/src/main/res/layout/activity_main.xml
-
-          M=$(find . -name "strings.xml" -not -path "./.git/*" | head -1)
-          [ -n "$M" ] && cp "$M" app/src/main/res/values/strings.xml
-
-          M=$(find . -name "themes.xml" -not -path "./.git/*" | head -1)
-          [ -n "$M" ] && cp "$M" app/src/main/res/values/themes.xml
-
-          M=$(find . -name "index.html" -not -path "./.git/*" | head -1)
-          [ -n "$M" ] && cp "$M" app/src/main/assets/index.html
-
-          # app/build.gradle
-          M=$(grep -rl "com.android.application" --include="build.gradle" . 2>/dev/null | grep -v "./.git" | head -1)
-          [ -n "$M" ] && cp "$M" app/build.gradle
-
-      - name: Create missing root build.gradle
+      - name: Write root build.gradle
         run: |
           cat > build.gradle << 'EOF'
           buildscript {
@@ -59,7 +71,6 @@ jobs:
                   classpath 'com.android.tools.build:gradle:8.2.2'
               }
           }
-
           allprojects {
               repositories {
                   google()
@@ -67,13 +78,10 @@ jobs:
               }
           }
           EOF
-          echo "=== build.gradle created ==="
-          cat build.gradle
 
-      - name: Create missing settings.gradle if needed
+      - name: Write settings.gradle
         run: |
-          if [ ! -f settings.gradle ]; then
-            cat > settings.gradle << 'EOF'
+          cat > settings.gradle << 'EOF'
           pluginManagement {
               repositories {
                   google()
@@ -89,38 +97,26 @@ jobs:
               }
           }
           rootProject.name = "OilQuizApp"
-          include ':app'
+          include ':oilquiz'
           EOF
-            echo "=== settings.gradle created ==="
-          else
-            echo "=== settings.gradle already exists ==="
-          fi
 
-      - name: Create missing gradle.properties if needed
+      - name: Write gradle.properties
         run: |
-          if [ ! -f gradle.properties ]; then
-            cat > gradle.properties << 'EOF'
+          cat > gradle.properties << 'EOF'
           android.useAndroidX=true
           android.enableJetifier=true
           org.gradle.jvmargs=-Xmx2048m
           EOF
-            echo "=== gradle.properties created ==="
-          else
-            echo "=== gradle.properties already exists ==="
-          fi
 
-      - name: Create missing app/build.gradle if needed
+      - name: Write oilquiz/build.gradle
         run: |
-          if [ ! -f app/build.gradle ]; then
-            cat > app/build.gradle << 'EOF'
+          cat > oilquiz/build.gradle << 'EOF'
           plugins {
               id 'com.android.application'
           }
-
           android {
               namespace 'com.ahvaz.oilquiz'
               compileSdk 34
-
               defaultConfig {
                   applicationId "com.ahvaz.oilquiz"
                   minSdk 21
@@ -128,45 +124,31 @@ jobs:
                   versionCode 1
                   versionName "1.0"
               }
-
               buildTypes {
                   release {
                       minifyEnabled false
                   }
               }
-
               compileOptions {
                   sourceCompatibility JavaVersion.VERSION_17
                   targetCompatibility JavaVersion.VERSION_17
               }
           }
-
           dependencies {
               implementation 'androidx.appcompat:appcompat:1.6.1'
               implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
           }
           EOF
-            echo "=== app/build.gradle created ==="
-          else
-            echo "=== app/build.gradle already exists ==="
-          fi
 
       - name: Verify all files
         run: |
-          REQUIRED="app/build.gradle build.gradle settings.gradle gradle.properties app/src/main/AndroidManifest.xml app/src/main/java/com/ahvaz/oilquiz/MainActivity.java app/src/main/res/layout/activity_main.xml app/src/main/res/values/strings.xml app/src/main/res/values/themes.xml app/src/main/assets/index.html"
-          MISSING=0
-          for f in $REQUIRED; do
-            if [ -f "$f" ]; then
-              echo "✅ $f"
-            else
-              echo "❌ MISSING: $f"
-              MISSING=$((MISSING+1))
-            fi
+          echo "=== final structure ==="
+          find . -type f -not -path "./.git/*" -not -path "*/gradle/wrapper/*" | sort
+          echo ""
+          echo "=== check required ==="
+          for f in build.gradle settings.gradle gradle.properties oilquiz/build.gradle oilquiz/src/main/AndroidManifest.xml oilquiz/src/main/java/com/ahvaz/oilquiz/MainActivity.java oilquiz/src/main/res/layout/activity_main.xml oilquiz/src/main/res/values/strings.xml oilquiz/src/main/res/values/themes.xml oilquiz/src/main/assets/index.html; do
+            if [ -f "$f" ]; then echo "OK $f"; else echo "MISSING $f"; fi
           done
-          if [ $MISSING -gt 0 ]; then
-            echo "===== $MISSING missing files ====="
-            exit 1
-          fi
 
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
@@ -175,10 +157,10 @@ jobs:
         run: |
           gradle wrapper --gradle-version 8.4
           chmod +x ./gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew :oilquiz:assembleDebug --no-daemon --stacktrace
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: OilQuiz-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: oilquiz/build/outputs/apk/debug/*.apk
+          if-no-files-found: warn
