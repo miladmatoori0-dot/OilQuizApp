@@ -1,249 +1,420 @@
-name: Build APK
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>کوییز دانشکده نفت اهواز</title>
+<style>
+:root{--bg:linear-gradient(160deg,#0d1b2a,#1b263b 50%,#0d1b2a);--card:#1b263b;--card2:#22304a;--accent:#ffb703;--accent2:#fb8500;--green:#2ecc71;--red:#e74c3c;--text:#e0e1dd;--muted:#8d99ae;--shadow:0 15px 40px rgba(0,0,0,.5)}
+html.light{--bg:linear-gradient(160deg,#f5f7fa,#e8eef5 50%,#f5f7fa);--card:#fff;--card2:#f0f4f8;--accent:#d97706;--accent2:#b45309;--green:#16a34a;--red:#dc2626;--text:#1a202c;--muted:#64748b;--shadow:0 15px 40px rgba(0,0,0,.15)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+body{font-family:Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;padding:10px;transition:.3s}
+#app{width:100%;max-width:560px}
+.screen{display:none;background:var(--card);border-radius:20px;padding:20px 16px;box-shadow:var(--shadow)}
+.screen.active{display:block}
+.brand{text-align:center;padding:18px 12px 14px;border-radius:16px;background:linear-gradient(135deg,var(--card),var(--card2));margin-bottom:16px;border:1px solid rgba(255,183,3,.25);position:relative}
+.oil-icon{width:76px;height:76px;margin:0 auto 8px;display:block}
+.brand-title{font-size:18px;font-weight:bold;color:var(--accent)}
+.brand-sub{font-size:12px;color:var(--muted);margin-top:6px}
+.theme-btn,.sound-btn{position:absolute;top:12px;width:40px;height:40px;border-radius:50%;background:rgba(255,183,3,.15);border:1px solid rgba(255,183,3,.3);color:var(--accent);font-size:18px;cursor:pointer;padding:0}
+.theme-btn{left:12px}.sound-btn{right:12px}.sound-btn.muted{opacity:.4}
+h2{font-size:16px;text-align:center;margin-bottom:12px;color:var(--accent)}
+h3{font-size:13px;color:var(--accent);margin:14px 0 6px;text-align:right}
+button{width:100%;padding:14px;margin:6px 0;border:none;border-radius:12px;background:var(--card2);color:var(--text);font-size:14.5px;font-family:inherit;cursor:pointer;font-weight:500;transition:.15s}
+button:active{transform:scale(.97)}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0d1b2a;font-weight:bold;font-size:15.5px}
+html.light .btn-primary{color:#fff}
+.btn-green{background:linear-gradient(135deg,#2ecc71,#27ae60);color:#fff;font-weight:bold}
+.btn-danger{background:linear-gradient(135deg,#e74c3c,#c0392b);color:#fff;font-weight:bold}
+.best-badge{text-align:center;background:rgba(255,183,3,.1);border:1px dashed rgba(255,183,3,.4);padding:7px;border-radius:10px;margin-bottom:10px;font-size:11.5px;color:var(--accent)}
+.level-tabs{display:flex;gap:6px;margin-bottom:14px}
+.level-tabs button{flex:1;padding:9px 6px;font-size:11.5px;margin:0;background:var(--card2);border-radius:10px;border:1px solid transparent}
+.level-tabs button.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0d1b2a;font-weight:bold}
+html.light .level-tabs button.active{color:#fff}
+.level-tabs button.locked-tab{opacity:.5}
+.stage-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:14px}
+.stage-btn{aspect-ratio:1;border-radius:10px;background:var(--card2);border:2px solid transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:15px;font-weight:bold;cursor:pointer;position:relative;padding:2px}
+.stage-btn.locked{opacity:.35;cursor:not-allowed}
+.stage-btn.locked::after{content:"🔒";position:absolute;inset:0;background:rgba(0,0,0,.7);border-radius:10px;display:flex;align-items:center;justify-content:center}
+.stage-btn.passed{background:linear-gradient(135deg,rgba(46,204,113,.25),rgba(46,204,113,.1));border-color:var(--green);color:var(--green)}
+.stage-btn.current{border-color:var(--accent);box-shadow:0 0 0 2px rgba(255,183,3,.2)}
+.stage-btn .num{font-size:13px}
+.stage-btn .pct{font-size:9px;color:var(--muted);margin-top:3px;font-weight:normal}
+.top-bar{display:flex;justify-content:space-between;margin-bottom:10px;font-size:11.5px;color:var(--muted)}
+.top-bar .pill{background:var(--card2);padding:5px 11px;border-radius:20px;font-weight:bold;color:var(--accent)}
+.progress-bar{height:5px;background:var(--card2);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;transition:.3s}
+.q-cat-tag{display:inline-block;font-size:10.5px;background:rgba(255,183,3,.12);color:var(--accent);padding:3px 9px;border-radius:12px;margin-bottom:10px}
+.q-text{font-size:15px;line-height:1.85;margin-bottom:16px;padding:14px;background:var(--card2);border-radius:12px;border-right:3px solid var(--accent);min-height:70px;display:flex;align-items:center}
+.opt-btn{background:var(--card2);text-align:right;padding:12px 42px 12px 14px;font-size:13.5px;border-radius:11px;border:2px solid transparent;position:relative;display:block}
+.opt-letter{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:22px;height:22px;border-radius:6px;background:rgba(255,183,3,.12);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold}
+.opt-btn.correct{background:rgba(46,204,113,.2)!important;border-color:var(--green);color:var(--green)}
+.opt-btn.correct .opt-letter{background:var(--green);color:#fff}
+.opt-btn.wrong{background:rgba(231,76,60,.2)!important;border-color:var(--red);color:var(--red)}
+.opt-btn.wrong .opt-letter{background:var(--red);color:#fff}
+.result-icon{font-size:52px;text-align:center;margin:8px 0}
+.result-score{text-align:center;font-size:38px;font-weight:bold;color:var(--accent);margin:6px 0}
+.result-msg{text-align:center;font-size:13.5px;line-height:1.85;margin-bottom:16px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:14px}
+.stat-box{background:var(--card2);padding:10px 5px;border-radius:11px;text-align:center}
+.stat-num{font-size:18px;font-weight:bold;color:var(--accent)}
+.stat-label{font-size:10px;color:var(--muted);margin-top:3px}
+.footer-note{text-align:center;font-size:9.5px;color:var(--muted);margin-top:14px;line-height:1.9;padding:10px 6px;border-top:1px solid rgba(255,183,3,.15)}
+.hidden{display:none!important}
+.retry-info{text-align:center;font-size:11px;color:var(--muted);margin-top:8px;font-style:italic}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="start" class="screen active">
+    <div class="brand">
+      <button class="theme-btn" onclick="toggleTheme()">☀️</button>
+      <button class="sound-btn" onclick="toggleSound()">🔊</button>
+      <svg class="oil-icon" viewBox="0 0 100 100"><defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ffb703"/><stop offset="100%" stop-color="#fb8500"/></linearGradient></defs>
+        <polygon points="50,10 42,35 58,35" fill="url(#g1)"/><rect x="46" y="35" width="8" height="20" fill="url(#g1)"/>
+        <line x1="42" y1="35" x2="30" y2="55" stroke="url(#g1)" stroke-width="2"/><line x1="58" y1="35" x2="70" y2="55" stroke="url(#g1)" stroke-width="2"/>
+        <line x1="38" y1="45" x2="62" y2="45" stroke="url(#g1)" stroke-width="1.5"/><line x1="34" y1="50" x2="66" y2="50" stroke="url(#g1)" stroke-width="1.5"/>
+        <ellipse cx="50" cy="62" rx="30" ry="6" fill="#1a1a1a" opacity=".9"/><ellipse cx="50" cy="65" rx="32" ry="7" fill="url(#g1)" opacity=".8"/>
+        <path d="M 50 75 Q 44 82 44 86 Q 44 91 50 91 Q 56 91 56 86 Q 56 82 50 75 Z" fill="url(#g1)"/></svg>
+      <div class="brand-title">کوییز دانشکده نفت اهواز</div>
+      <div class="brand-sub">صنایع نفت • گاز • پالایش • پتروشیمی • حفاری • HSE</div>
+    </div>
+    <div id="bestScoreBox" class="best-badge hidden"></div>
+    <div style="text-align:center;color:var(--muted);font-size:12px;margin-bottom:8px;">بانک: <strong id="bankSize" style="color:var(--accent)">…</strong> سوال</div>
+    <h2>۱۰۰ مرحله • ۴ سطح</h2>
+    <button class="btn-primary" onclick="showStagesScreen(1)">🚀 شروع / ادامهٔ بازی</button>
+    <button onclick="showStats()">📊 آمار و رکوردها</button>
+    <button onclick="resetAll()" style="background:transparent;color:var(--muted);font-size:12px;">🔄 ریست پیشرفت</button>
+    <div class="footer-note">کوییز دانشکده نفت اهواز • نسخه ۷.۰ • کاملاً آفلاین<br>تمامی حقوق مادی و معنوی متعلق به مرکز فناوری اطلاعات و ارتباطات دانشکده نفت اهواز می‌باشد.</div>
+  </div>
+  <div id="stagesScreen" class="screen"><h2>مرحله را انتخاب کن</h2><div class="level-tabs" id="levelTabs"></div><div class="stage-grid" id="stageGrid"></div><button onclick="goHome()">← بازگشت</button></div>
+  <div id="quizScreen" class="screen">
+    <div class="top-bar"><span class="pill" id="scorePill">امتیاز: 0</span><span id="questionCounter">سوال ۱ از ۱۰</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <span class="q-cat-tag" id="qCatTag">...</span>
+    <div class="q-text" id="qText">...</div>
+    <div id="optionsBox"></div>
+    <button id="nextBtn" class="btn-primary hidden" onclick="nextQuestion()">سوال بعدی ←</button>
+    <button onclick="quitGame()" style="background:transparent;color:var(--muted);font-size:11.5px;margin-top:8px;">انصراف</button>
+  </div>
+  <div id="resultScreen" class="screen">
+    <div class="result-icon" id="resultIcon">🏆</div>
+    <div class="result-score" id="resultScore">0</div>
+    <div class="result-msg" id="resultMsg"></div>
+    <div class="stat-grid"><div class="stat-box"><div class="stat-num" id="statCorrect">0</div><div class="stat-label">صحیح</div></div><div class="stat-box"><div class="stat-num" id="statWrong">0</div><div class="stat-label">غلط</div></div><div class="stat-box"><div class="stat-num" id="statPercent">0%</div><div class="stat-label">درصد</div></div></div>
+    <div id="resultBtns"></div><div class="retry-info" id="retryInfo"></div>
+  </div>
+  <div id="statsScreen" class="screen"><h2>📊 آمار شما</h2><div id="statsContent"></div><button onclick="goHome()">← بازگشت</button></div>
+</div>
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
+<script>
+// ============ صدا ============
+let audioCtx=null,soundEnabled=true;
+try{const s=localStorage.getItem('oil_quiz_sound');if(s!==null)soundEnabled=s==='true'}catch(e){}
+function initAudio(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)()}catch(e){audioCtx=null}}}
+function playTone(f,d,t,v){if(!soundEnabled)return;initAudio();if(!audioCtx)return;try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type=t||'sine';o.frequency.value=f;g.gain.setValueAtTime(v||0.15,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+d);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+d)}catch(e){}}
+function soundCorrect(){setTimeout(()=>playTone(523.25,0.15,'sine',0.18),0);setTimeout(()=>playTone(659.25,0.15,'sine',0.18),100);setTimeout(()=>playTone(783.99,0.3,'sine',0.18),200)}
+function soundWrong(){playTone(220,0.2,'sawtooth',0.12);setTimeout(()=>playTone(165,0.3,'sawtooth',0.12),150)}
+function soundClick(){playTone(800,0.05,'sine',0.08)}
+function soundWin(){[523.25,659.25,783.99,1046.5].forEach((f,i)=>setTimeout(()=>playTone(f,0.25,'sine',0.2),i*120))}
+function soundFail(){[392,349.23,293.66,261.63].forEach((f,i)=>setTimeout(()=>playTone(f,0.3,'triangle',0.15),i*150))}
+function toggleSound(){soundEnabled=!soundEnabled;try{localStorage.setItem('oil_quiz_sound',soundEnabled)}catch(e){}document.querySelectorAll('.sound-btn').forEach(b=>{b.textContent=soundEnabled?'🔊':'🔇';b.classList.toggle('muted',!soundEnabled)});if(soundEnabled){initAudio();soundClick()}}
 
-      - name: Create module structure
-        run: |
-          MOD="oilquiz"
-          rm -rf "$MOD"
-          mkdir -p "$MOD/src/main/java/com/ahvaz/oilquiz"
-          mkdir -p "$MOD/src/main/res/layout"
-          mkdir -p "$MOD/src/main/res/values"
-          mkdir -p "$MOD/src/main/res/drawable"
-          mkdir -p "$MOD/src/main/assets"
+// ============ تم ============
+let currentTheme='dark';
+try{const t=localStorage.getItem('oil_quiz_theme');if(t)currentTheme=t}catch(e){}
+function applyTheme(){document.documentElement.classList.toggle('light',currentTheme==='light');document.querySelectorAll('.theme-btn').forEach(b=>b.textContent=currentTheme==='light'?'🌙':'☀️')}
+function toggleTheme(){currentTheme=currentTheme==='dark'?'light':'dark';try{localStorage.setItem('oil_quiz_theme',currentTheme)}catch(e){}applyTheme();soundClick()}
 
-      - name: Copy index.html
-        run: |
-          MOD="oilquiz"
-          cp index.html "$MOD/src/main/assets/index.html"
-          echo "index.html size: $(wc -c < index.html) bytes"
-          grep -c "toggleTheme" index.html && echo "✅ Theme OK" || echo "❌ Theme missing"
-          grep -c "addQ" index.html && echo "✅ addQ OK" || echo "❌ addQ missing"
+// ============ بانک سوالات ============
+const _shuffle=a=>{const x=[...a];for(let i=x.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[x[i],x[j]]=[x[j],x[i]]}return x};
+const _pick=(a,n)=>_shuffle(a).slice(0,n);
+const BANK=[];
+const buildOpts=(c,w,n=3)=>{const u=[...new Set(w.filter(x=>x!==c&&x!=null&&x!==''))];if(u.length<n)return null;const p=_pick(u,n);const o=_shuffle([c,...p]);return{opts:o,ans:o.indexOf(c)}};
+const addQ=(l,c,q,o,a)=>{if(!Array.isArray(o)||o.length!==4||a<0||a>3)return;const k=q+'|'+o.join('|');if(BANK.some(x=>x.k===k))return;BANK.push({l,c,q,o,a,k})};
 
-      - name: Write AndroidManifest.xml
-        run: |
-          cat > oilquiz/src/main/AndroidManifest.xml << 'XMLEOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <application
-                  android:allowBackup="true"
-                  android:label="کوییز دانشکده نفت اهواز"
-                  android:icon="@drawable/ic_oil"
-                  android:theme="@style/Theme.OilQuiz"
-                  android:hardwareAccelerated="true"
-                  android:supportsRtl="true">
-                  <activity
-                      android:name=".MainActivity"
-                      android:configChanges="orientation|screenSize|keyboardHidden"
-                      android:screenOrientation="portrait"
-                      android:exported="true">
-                      <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
-                      </intent-filter>
-                  </activity>
-              </application>
-          </manifest>
-          XMLEOF
+// داده‌های پایه
+const ALKANES=[{n:1,name:'متان',f:'CH₄'},{n:2,name:'اتان',f:'C₂H₆'},{n:3,name:'پروپان',f:'C₃H₈'},{n:4,name:'بوتان',f:'C₄H₁₀'},{n:5,name:'پنتان',f:'C₅H₁₂'},{n:6,name:'هکسان',f:'C₆H₁₄'},{n:7,name:'هپتان',f:'C₇H₁₆'},{n:8,name:'اکتان',f:'C₈H₁₈'},{n:9,name:'نونان',f:'C₉H₂₀'},{n:10,name:'دکان',f:'C₁₀H₂₂'}];
+const ACRONYMS=[{a:'BOP',e:'Blowout Preventer',p:'پیشگیری از فوران چاه'},{a:'FCC',e:'Fluid Catalytic Cracking',p:'کراکینگ کاتالیستی'},{a:'EOR',e:'Enhanced Oil Recovery',p:'ازدیاد برداشت'},{a:'HSE',e:'Health Safety Environment',p:'بهداشت، ایمنی و محیط زیست'},{a:'MSDS',e:'Material Safety Data Sheet',p:'برگه اطلاعات ایمنی'},{a:'LNG',e:'Liquefied Natural Gas',p:'گاز طبیعی مایع'},{a:'LPG',e:'Liquefied Petroleum Gas',p:'گاز مایع نفتی'},{a:'CNG',e:'Compressed Natural Gas',p:'گاز طبیعی فشرده'},{a:'NGL',e:'Natural Gas Liquids',p:'مایعات گاز طبیعی'},{a:'API',e:'American Petroleum Institute',p:'انجمن نفت آمریکا'},{a:'OPEC',e:'Organization of Petroleum Exporting Countries',p:'سازمان کشورهای صادرکننده نفت'},{a:'GOR',e:'Gas Oil Ratio',p:'نسبت گاز به نفت'},{a:'ROP',e:'Rate of Penetration',p:'سرعت نفوذ مته'},{a:'TVD',e:'True Vertical Depth',p:'عمق قائم واقعی'},{a:'WOB',e:'Weight On Bit',p:'وزن روی مته'},{a:'ESP',e:'Electric Submersible Pump',p:'پمپ درون‌چاهی'},{a:'PCP',e:'Progressing Cavity Pump',p:'پمپ حفره‌ای پیشرونده'},{a:'SAGD',e:'Steam Assisted Gravity Drainage',p:'زهکشی ثقلی با بخار'},{a:'CSS',e:'Cyclic Steam Stimulation',p:'تحریک چرخه‌ای بخار'},{a:'WAG',e:'Water Alternating Gas',p:'تزریق متناوب آب و گاز'},{a:'HPHT',e:'High Pressure High Temperature',p:'فشار و دمای بالا'},{a:'BHA',e:'Bottom Hole Assembly',p:'مجموعه مته پایین چاه'},{a:'MWD',e:'Measurement While Drilling',p:'اندازه‌گیری حین حفاری'},{a:'LWD',e:'Logging While Drilling',p:'نموداربرداری حین حفاری'},{a:'PPE',e:'Personal Protective Equipment',p:'تجهیزات حفاظت فردی'},{a:'LEL',e:'Lower Explosive Limit',p:'حد پایین اشتعال‌پذیری'},{a:'UEL',e:'Upper Explosive Limit',p:'حد بالای اشتعال‌پذیری'},{a:'FPSO',e:'Floating Production Storage Offloading',p:'شناور تولید و ذخیره'},{a:'TEG',e:'Triethylene Glycol',p:'تری‌اتیلن گلیکول'},{a:'BTX',e:'Benzene Toluene Xylene',p:'بنزن، تولوئن، زایلن'},{a:'HDS',e:'Hydrodesulfurization',p:'هیدروگوگردزدایی'},{a:'SRU',e:'Sulfur Recovery Unit',p:'واحد بازیافت گوگرد'},{a:'CDU',e:'Crude Distillation Unit',p:'واحد تقطیر نفت خام'},{a:'VDU',e:'Vacuum Distillation Unit',p:'واحد تقطیر در خلأ'}];
+const PETRO=[{m:'اتیلن',p:'پلی‌اتیلن (PE)'},{m:'پروپیلن',p:'پلی‌پروپیلن (PP)'},{m:'وینیل کلراید',p:'پلی‌وینیل کلراید (PVC)'},{m:'استایرن',p:'پلی‌استایرن (PS)'},{m:'بوتادین و استایرن',p:'لاستیک SBR'},{m:'اتیلن گلیکول + ترفتالیک',p:'پلی‌اتیلن ترفتالات (PET)'},{m:'تترافلوئورواتیلن',p:'پلی‌تترافلوئورواتیلن (PTFE)'},{m:'متیل متاکریلات',p:'پلی‌متیل متاکریلات (PMMA)'},{m:'کاپرولاکتام',p:'نایلون ۶'},{m:'ایزوسیانات + پلی‌اُل',p:'پلی‌یورتان (PU)'}];
+const COUNTRIES=[{n:'ونزوئلا',rank:1,cont:'آمریکای جنوبی'},{n:'عربستان سعودی',rank:2,cont:'خاورمیانه'},{n:'کانادا',rank:3,cont:'آمریکای شمالی'},{n:'ایران',rank:4,cont:'خاورمیانه'},{n:'عراق',rank:5,cont:'خاورمیانه'},{n:'کویت',rank:6,cont:'خاورمیانه'},{n:'امارات',rank:7,cont:'خاورمیانه'},{n:'روسیه',rank:8,cont:'اوراسیا'},{n:'لیبی',rank:9,cont:'آفریقا'},{n:'نیجریه',rank:10,cont:'آفریقا'},{n:'قطر',rank:14,cont:'خاورمیانه'}];
+const FIELDS=[{n:'غوار',c:'عربستان سعودی'},{n:'بورگان',c:'کویت'},{n:'اهواز',c:'ایران'},{n:'گچساران',c:'ایران'},{n:'مارون',c:'ایران'},{n:'آغاجاری',c:'ایران'},{n:'کرنج',c:'ایران'},{n:'پارسی',c:'ایران'},{n:'شمال/جنوب پارس',c:'ایران و قطر'},{n:'کانتارل',c:'مکزیک'},{n:'تنگیز',c:'قزاقستان'},{n:'ساموتلور',c:'روسیه'},{n:'فردوس',c:'ایران'},{n:'اسفندیار',c:'ایران'},{n:'سروش',c:'ایران'},{n:'نوروز',c:'ایران'},{n:'کرکوک',c:'عراق'},{n:'رُمیله',c:'عراق'},{n:'زاکوم',c:'امارات'}];
+const REF=[{n:'آبادان',c:'ایران'},{n:'تهران',c:'ایران'},{n:'اصفهان',c:'ایران'},{n:'بندرعباس',c:'ایران'},{n:'اراک (شازند)',c:'ایران'},{n:'تبریز',c:'ایران'},{n:'شیراز',c:'ایران'},{n:'ستاره خلیج فارس',c:'ایران'},{n:'جامناگر',c:'هند'},{n:'جورونگ',c:'سنگاپور'},{n:'راس‌تنوره',c:'عربستان'},{n:'روتردام',c:'هلند'}];
+const GASES=[{name:'متان',f:'CH₄'},{name:'اتان',f:'C₂H₆'},{name:'پروپان',f:'C₃H₈'},{name:'بوتان',f:'C₄H₁₀'},{name:'هیدروژن',f:'H₂'},{name:'هلیم',f:'He'},{name:'نیتروژن',f:'N₂'},{name:'اکسیژن',f:'O₂'},{name:'دی‌اکسید کربن',f:'CO₂'},{name:'مونوکسید کربن',f:'CO'},{name:'سولفید هیدروژن',f:'H₂S'},{name:'آمونیاک',f:'NH₃'}];
 
-      - name: Write strings.xml
-        run: |
-          cat > oilquiz/src/main/res/values/strings.xml << 'EOF'
-          <resources>
-              <string name="app_name">کوییز دانشکده نفت اهواز</string>
-          </resources>
-          EOF
+// سوالات دست‌نویس
+[{l:1,c:'عمومی',q:'نفت خام عمدتاً از چه عناصری تشکیل شده؟',o:['کربن و هیدروژن','اکسیژن و نیتروژن','گوگرد و فسفر','آهن و کربن'],a:0},
+{l:1,c:'عمومی',q:'واحد بین‌المللی حجم نفت؟',o:['تن','بشکه','متر مکعب','گالن'],a:1},
+{l:1,c:'پالایش',q:'کدام فرآورده سبک‌تر است؟',o:['قیر','نفت کوره','بنزین','روغن موتور'],a:2},
+{l:1,c:'شیمی نفت',q:'فرمول متان؟',o:['C₂H₆','C₃H₈','CH₄','C₄H₁₀'],a:2},
+{l:1,c:'جغرافیا',q:'بیشترین میادین نفتی ایران در کدام استان؟',o:['خوزستان','بوشهر','هرمزگان','تهران'],a:0},
+{l:1,c:'عمومی',q:'یک بشکه نفت چند لیتر؟',o:['۱۰۰','۲۰۰','۱۵۹','۵۰'],a:2},
+{l:1,c:'ایمنی (HSE)',q:'بوی H₂S شبیه چیست؟',o:['بی‌بو','شیرین','بنزین','تخم‌مرغ گندیده'],a:3},
+{l:1,c:'حفاری',q:'لوله جلوگیری از ریزش دیواره چاه؟',o:['Casing','Tubing','Drill Pipe','Kelly'],a:0},
+{l:1,c:'عمومی',q:'بزرگ‌ترین میدان نفتی جهان؟',o:['اهواز','غوار عربستان','نوروز','بورگان کویت'],a:1},
+{l:1,c:'عمومی',q:'مهم‌ترین کاربرد گاز طبیعی؟',o:['سوخت نیروگاه‌ها','تولید کاغذ','رنگ‌آمیزی','داروسازی'],a:0},
+{l:2,c:'حفاری',q:'مهم‌ترین وظیفهٔ گل حفاری؟',o:['خنک کردن مته و حمل کنده‌ها','رنگ‌آمیزی چاه','افزایش وزن دکل','روغن‌کاری سیم بکسل'],a:0},
+{l:2,c:'حفاری',q:'BOP مخفف چیست؟',o:['Bottom Oil Pump','Blowout Preventer','Basic Operating Platform','Borehole Output Pipe'],a:1},
+{l:2,c:'حفاری',q:'ماده اصلی گل حفاری پایه آبی؟',o:['روغن دیزل','آب و بنتونیت','الکل صنعتی','گازوئیل'],a:1},
+{l:2,c:'حفاری',q:'باریت در گل حفاری چه می‌کند؟',o:['افزایش وزن گل','کاهش ویسکوزیته','خوشبو کردن','رنگ‌آمیزی'],a:0},
+{l:2,c:'بهره‌برداری',q:'روش Water Flooding چیست؟',o:['تزریق آب به مخزن','شستشو','تزریق بخار','کاهش فشار'],a:0},
+{l:2,c:'بهره‌برداری',q:'Gas Lift چه می‌کند؟',o:['جداسازی گاز','تزریق گاز به ستون سیال','سرد کردن چاه','افزایش فشار مخزن'],a:1},
+{l:2,c:'پالایش',q:'هدف ریفرمینگ کاتالیستی؟',o:['افزایش اکتان بنزین','کاهش گوگرد','تولید قیر','افزایش نفت کوره'],a:0},
+{l:2,c:'زمین‌شناسی نفت',q:'تخلخل چیست؟',o:['نسبت حجم حفرات به حجم کل','وزن مخصوص','سختی سنگ','رنگ سنگ'],a:0},
+{l:2,c:'زمین‌شناسی نفت',q:'تراوایی چه نشان می‌دهد؟',o:['سختی سنگ','چگالی','توانایی عبور سیال','رنگ سنگ'],a:2},
+{l:2,c:'زمین‌شناسی نفت',q:'رایج‌ترین تله نفتی؟',o:['تله چینه‌ای','تله ساختمانی (آنتیکلاین)','گنبد نمکی','هیدرودینامیکی'],a:1},
+{l:3,c:'پالایش',q:'هیدروکراکینگ چیست؟',o:['شکستن هیدروکربن سنگین با هیدروژن','افزودن آب به نفت','تقطیر در خلأ','تبدیل گاز به مایع'],a:0},
+{l:3,c:'پالایش',q:'کک نفتی در کدام فرآیند؟',o:['کک‌سازی تأخیری','تقطیر اتمسفریک','ریفرمینگ','آلکیلاسیون'],a:0},
+{l:3,c:'پالایش',q:'عدد اکتان نشان‌دهنده؟',o:['میزان گوگرد','مقاومت به کوبش','چگالی','رنگ'],a:1},
+{l:3,c:'شیمی نفت',q:'عامل بوی نامطبوع نفت؟',o:['آلکان‌ها','مرکاپتان‌ها','آروماتیک‌ها','آب'],a:1},
+{l:3,c:'ایمنی (HSE)',q:'حد مواجهه ۸ ساعته H₂S؟',o:['حدود ۱۰ ppm','حدود ۱۰۰ ppm','حدود ۵۰۰ ppm','محدودیتی ندارد'],a:0},
+{l:4,c:'زمین‌شناسی نفت',q:'کروژن چیست؟',o:['ماده آلی سنگ منشأ','نوعی گاز','نمک','سیال حفاری'],a:0},
+{l:4,c:'عمومی',q:'اوپک در چه سالی تأسیس شد؟',o:['۱۹۶۰','۱۹۴۵','۱۹۷۳','۱۹۸۰'],a:0},
+{l:4,c:'عمومی',q:'بزرگ‌ترین پالایشگاه ایران؟',o:['آبادان','تهران','اصفهان','بندرعباس'],a:0},
+{l:4,c:'عمومی',q:'تفاوت نفت شیرین و ترش؟',o:['میزان گوگرد','رنگ','چگالی','سن'],a:0}
+].forEach(h=>addQ(h.l,h.c,h.q,h.o,h.a));
 
-      - name: Write themes.xml
-        run: |
-          cat > oilquiz/src/main/res/values/themes.xml << 'EOF'
-          <resources>
-              <style name="Theme.OilQuiz" parent="Theme.AppCompat.NoActionBar">
-                  <item name="android:statusBarColor">#0d1b2a</item>
-                  <item name="android:navigationBarColor">#0d1b2a</item>
-                  <item name="android:windowBackground">#0d1b2a</item>
-              </style>
-          </resources>
-          EOF
+// Generatorها — نسخه فشرده
+function genAlkanes(){ALKANES.forEach(a=>{const oF=ALKANES.filter(x=>x.n!==a.n).map(x=>x.f);const oN=ALKANES.filter(x=>x.n!==a.n).map(x=>x.name);let r=buildOpts(a.f,oF);if(r)addQ('شیمی نفت',`فرمول «${a.name}»؟`,r.opts,r.ans);r=buildOpts(a.name,oN);if(r)addQ('شیمی نفت',`نام «${a.f}»؟`,r.opts,r.ans);const wC=[a.n+1,a.n+2,a.n-1,a.n+3].filter(x=>x>0&&x!==a.n).map(String);r=buildOpts(String(a.n),wC);if(r)addQ('شیمی نفت',`${a.name} چند اتم کربن دارد؟`,r.opts,r.ans)})}
+function genAcronyms(){ACRONYMS.forEach(ac=>{const oE=ACRONYMS.filter(x=>x.a!==ac.a).map(x=>x.e);const oP=ACRONYMS.filter(x=>x.a!==ac.a).map(x=>x.p);let r=buildOpts(ac.e,oE);if(r)addQ('اختصارات',`«${ac.a}» به چه معناست؟`,r.opts,r.ans);r=buildOpts(ac.p,oP);if(r)addQ('اختصارات',`معادل فارسی «${ac.a}»؟`,r.opts,r.ans)})}
+function genPetrochem(){PETRO.forEach(p=>{const oM=PETRO.filter(x=>x.p!==p.p).map(x=>x.m);const oP=PETRO.filter(x=>x.p!==p.p).map(x=>x.p);let r=buildOpts(p.p,oP);if(r)addQ('پتروشیمی',`مونومر «${p.m}» برای کدام پلیمر؟`,r.opts,r.ans);r=buildOpts(p.m,oM);if(r)addQ('پتروشیمی',`پلیمر «${p.p}» از چه مونومری؟`,r.opts,r.ans)})}
+function genCountries(){COUNTRIES.forEach(c=>{const oC=[...new Set(COUNTRIES.map(x=>x.cont))].filter(x=>x!==c.cont);let r=buildOpts(c.cont,oC);if(r)addQ('جغرافیا',`کشور «${c.n}» در کدام قاره/منطقه؟`,r.opts,r.ans);if(c.rank<=5){const oR=['رتبه ۱','رتبه ۲','رتبه ۳','رتبه ۴','رتبه ۵','رتبه ۶','رتبه ۷','رتبه ۸'].filter(x=>x!==`رتبه ${c.rank}`);r=buildOpts(`رتبه ${c.rank}`,oR);if(r)addQ('جغرافیا',`ذخایر نفت «${c.n}» در رتبه؟`,r.opts,r.ans)}})}
+function genFields(){FIELDS.forEach(f=>{const oC=[...new Set(FIELDS.map(x=>x.c))].filter(x=>x!==f.c);let r=buildOpts(f.c,oC);if(r)addQ('میادین نفتی',`میدان «${f.n}» در کدام کشور؟`,r.opts,r.ans)});const gh=FIELDS.find(x=>x.n==='غوار');if(gh){const w=['اهواز','نوروز','بورگان'].filter(x=>x!==gh.n);const r=buildOpts(gh.n,w);if(r)addQ('میادین نفتی','بزرگ‌ترین میدان نفتی جهان؟',r.opts,r.ans)}}
+function genRef(){REF.forEach(r=>{const oC=[...new Set(REF.map(x=>x.c))].filter(x=>x!==r.c);let rr=buildOpts(r.c,oC);if(rr)addQ('پالایش',`پالایشگاه «${r.n}» در کدام کشور؟`,rr.opts,rr.ans)});const jam=REF.find(x=>x.n==='جامناگر');if(jam){const w=REF.filter(x=>x.n!==jam.n).slice(0,3).map(x=>x.n);const r=buildOpts(jam.n,w);if(r)addQ('پالایش','بزرگ‌ترین پالایشگاه جهان؟',r.opts,r.ans)}}
+function genGases(){const names=GASES.map(x=>x.name);const forms=GASES.map(x=>x.f);GASES.forEach(g=>{const oF=forms.filter(x=>x!==g.f);let r=buildOpts(g.f,oF);if(r)addQ('شیمی نفت',`فرمول «${g.name}»؟`,r.opts,r.ans);const oN=names.filter(x=>x!==g.name);r=buildOpts(g.name,oN);if(r)addQ('شیمی نفت',`نام «${g.f}»؟`,r.opts,r.ans)})}
+function genEquipment(){const eq=[{n:'Separator',d:'جداسازی نفت، گاز و آب'},{n:'Heat Exchanger',d:'تبادل حرارت بین دو سیال'},{n:'Furnace',d:'گرم کردن سیال فرآیندی'},{n:'Reboiler',d:'تأمین حرارت برج تقطیر'},{n:'Condenser',d:'مایع کردن بخار بالای برج'},{n:'Compressor',d:'فشرده کردن گاز'},{n:'Pump',d:'افزایش فشار مایع'},{n:'Valve',d:'کنترل جریان سیال'},{n:'Reactor',d:'انجام واکنش شیمیایی'},{n:'Scrubber',d:'حذف گازهای اسیدی'},{n:'Flare',d:'سوزاندن گازهای اضافی'},{n:'Desalter',d:'حذف نمک از نفت خام'}];const ds=eq.map(x=>x.d);eq.forEach(e=>{const w=ds.filter(x=>x!==e.d);const r=buildOpts(e.d,w);if(r)addQ('تجهیزات',`کاربرد «${e.n}»؟`,r.opts,r.ans)})}
+function genEOR(){const eor=[{n:'Water Flooding',d:'تزریق آب برای راندن نفت'},{n:'CO₂ Flooding',d:'تزریق دی‌اکسید کربن برای کاهش گرانروی'},{n:'Polymer Flooding',d:'تزریق پلیمر برای بهبود جاروبی'},{n:'Surfactant Flooding',d:'تزریق سورفکتانت برای کاهش کشش سطحی'},{n:'Steam Injection',d:'تزریق بخار برای نفت سنگین'},{n:'SAGD',d:'زهکشی ثقلی با کمک بخار'},{n:'CSS',d:'تحریک چرخه‌ای بخار'},{n:'WAG',d:'تزریق متناوب آب و گاز'}];const ds=eor.map(x=>x.d);eor.forEach(e=>{const w=ds.filter(x=>x!==e.d);const r=buildOpts(e.d,w);if(r)addQ('بهره‌برداری',`روش «${e.n}» چیست؟`,r.opts,r.ans)})}
+function genDrill(){const df=[{n:'بنتونیت',d:'افزایش ویسکوزیته گل'},{n:'باریت',d:'افزایش وزن گل'},{n:'CMC',d:'کاهش اتلاف آب'},{n:'نمک NaCl',d:'افزایش چگالی گل'},{n:'آهک',d:'تنظیم pH گل'},{n:'دیزل',d:'پایه گل روغنی'},{n:'میکا',d:'کنترل هرزروی'}];const ds=df.map(x=>x.d);df.forEach(e=>{const w=ds.filter(x=>x!==e.d);const r=buildOpts(e.d,w);if(r)addQ('حفاری',`کاربرد «${e.n}» در گل حفاری؟`,r.opts,r.ans)})}
+function genCat(){const cat=[{n:'پلاتین',u:'ریفرمینگ کاتالیستی'},{n:'زئولیت',u:'کراکینگ FCC'},{n:'Co-Mo',u:'هیدروگوگردزدایی HDS'},{n:'Ni-Mo',u:'هیدروکراکینگ'},{n:'نیکل',u:'هیدروژناسیون'},{n:'آهن',u:'سنتز آمونیاک'}];const us=cat.map(x=>x.u);cat.forEach(e=>{const w=us.filter(x=>x!==e.u);const r=buildOpts(e.u,w);if(r)addQ('پالایش',`کاتالیست «${e.n}»؟`,r.opts,r.ans)})}
+function genStand(){const st=[{n:'API 610',d:'پمپ گریز از مرکز'},{n:'API 650',d:'مخازن ذخیره جوشی'},{n:'API 5L',d:'لوله‌های خطوط انتقال'},{n:'API 5CT',d:'لوله جداری و مغزی'},{n:'API 6A',d:'تجهیزات سرچاهی'},{n:'API 16A',d:'تجهیزات BOP'},{n:'ISO 9001',d:'مدیریت کیفیت'},{n:'ISO 14001',d:'مدیریت محیط زیست'}];const ds=st.map(x=>x.d);st.forEach(e=>{const w=ds.filter(x=>x!==e.d);const r=buildOpts(e.d,w);if(r)addQ('استانداردها',`استاندارد «${e.n}»؟`,r.opts,r.ans)})}
+function genCor(){const c=[{n:'خوردگی یکنواخت',d:'حمله به تمام سطح فلز'},{n:'خوردگی گالوانیک',d:'بین دو فلز مختلف'},{n:'خوردگی حفره‌ای',d:'موضعی به شکل حفره'},{n:'خوردگی تنشی (SCC)',d:'ترک تحت تنش و محیط خورنده'},{n:'خوردگی سولفیدی (SSC)',d:'ترک در حضور H₂S'},{n:'خوردگی میکروبی (MIC)',d:'ناشی از باکتری‌ها'}];const ds=c.map(x=>x.d);c.forEach(e=>{const w=ds.filter(x=>x!==e.d);const r=buildOpts(e.d,w);if(r)addQ('خوردگی',`«${e.n}» چیست؟`,r.opts,r.ans)})}
+function genHSE(){const h=[{n:'CO₂',d:'گاز گلخانه‌ای اصلی'},{n:'CH₄',d:'گاز گلخانه‌ای قوی'},{n:'SO₂',d:'گاز اسیدی گوگرد سوخت'},{n:'H₂S',d:'گاز سمی و بدبو'},{n:'VOC',d:'ترکیبات آلی فرار'},{n:'PM',d:'ذرات معلق'}];const ds=h.map(x=>x.d);h.forEach(e=>{const w=ds.filter(x=>x!==e.d);const r=buildOpts(e.d,w);if(r)addQ('ایمنی (HSE)',`«${e.n}» چیست؟`,r.opts,r.ans)})}
+function genMisc(){const qs=[{q:'گاز شوی (Scrubber) برای چه؟',a:'حذف گازهای اسیدی',w:['حذف آب','حذف گوگرد','فشرده‌سازی گاز']},{q:'نم‌گیری گاز با چه ماده‌ای؟',a:'TEG',w:['آب','الکل','اسید']},{q:'مهم‌ترین جزء گاز شیرین؟',a:'متان',w:['اتان','پروپان','CO₂']},{q:'گاز ترش چیست؟',a:'حاوی H₂S و CO₂',w:['رطوبت بالا','گرم','پرفشار']},{q:'هدف واحد SRU؟',a:'بازیافت گوگرد از گاز اسیدی',w:['تولید گاز','حذف آب','فشرده‌سازی']},{q:'فرآیند کلاز چه می‌کند؟',a:'تبدیل H₂S به گوگرد عنصری',w:['حذف CO₂','تولید گاز','حذف آب']},{q:'واحد الفین برای تولید؟',a:'اتیلن و پروپیلن',w:['متانول','اوره','بنزین']}];qs.forEach(e=>{const r=buildOpts(e.a,e.w);if(r)addQ('فرآیندها',e.q,r.opts,r.ans)})}
 
-      - name: Write oil icon drawable
-        run: |
-          cat > oilquiz/src/main/res/drawable/ic_oil.xml << 'EOF'
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="108dp"
-              android:height="108dp"
-              android:viewportWidth="108"
-              android:viewportHeight="108">
-              <path android:fillColor="#0d1b2a" android:pathData="M0,0h108v108h-108z"/>
-              <path android:fillColor="#ffb703" android:pathData="M54,18 L46,42 L62,42 Z"/>
-              <path android:fillColor="#ffb703" android:pathData="M51,42h6v20h-6z"/>
-              <path android:fillColor="#ffb703" android:strokeColor="#ffb703" android:strokeWidth="1.5" android:pathData="M46,42 L34,58 M62,42 L74,58"/>
-              <path android:fillColor="#ffb703" android:strokeColor="#ffb703" android:strokeWidth="1" android:pathData="M40,50 L68,50 M37,54 L71,54"/>
-              <path android:fillColor="#fb8500" android:pathData="M24,72 Q54,60 84,72 L84,84 Q54,72 24,84 Z"/>
-              <path android:fillColor="#ffb703" android:pathData="M54,86 Q48,92 48,96 Q48,101 54,101 Q60,101 60,96 Q60,92 54,86 Z"/>
-          </vector>
-          EOF
+genAlkanes();genAcronyms();genPetrochem();genCountries();genFields();genRef();genGases();genEquipment();genEOR();genDrill();genCat();genStand();genCor();genHSE();genMisc();
+console.log('📚 سوالات:',BANK.length);
 
-      - name: Write MainActivity.java
-        run: |
-          cat > oilquiz/src/main/java/com/ahvaz/oilquiz/MainActivity.java << 'JAVAEOF'
-          package com.ahvaz.oilquiz;
+// ============ توزیع یکتای سوالات ============
+const LEVEL_POOLS={};
+function getLevelPool(l){
+  if(!LEVEL_POOLS[l]){
+    let p=BANK.filter(q=>q.l===l);
+    if(p.length<250&&l<4)p=p.concat(BANK.filter(q=>q.l===l+1).slice(0,250-p.length));
+    if(p.length<250&&l>1)p=p.concat(BANK.filter(q=>q.l===l-1).slice(0,250-p.length));
+    LEVEL_POOLS[l]=_shuffle(p);
+  }
+  return LEVEL_POOLS[l];
+}
+function stageLevel(id){if(id<=25)return 1;if(id<=50)return 2;if(id<=75)return 3;return 4}
+function stagePassScore(id){return[60,70,75,80][stageLevel(id)-1]}
+function getStageQuestions(stageId){
+  const l=stageLevel(stageId);
+  const idx=(stageId-1)%25;
+  const pool=getLevelPool(l);
+  const start=(idx*10)%pool.length;
+  const qs=[];
+  for(let i=0;i<10;i++)qs.push(pool[(start+i)%pool.length]);
+  return qs;
+}
 
-          import android.annotation.SuppressLint;
-          import android.os.Bundle;
-          import android.view.KeyEvent;
-          import android.view.View;
-          import android.view.WindowManager;
-          import android.webkit.WebChromeClient;
-          import android.webkit.WebSettings;
-          import android.webkit.WebView;
-          import android.webkit.WebViewClient;
-          import androidx.activity.OnBackPressedCallback;
-          import androidx.appcompat.app.AppCompatActivity;
+// ============ ذخیره ============
+const KEY='ahvaz_oil_quiz_v7';
+function load(){try{const r=localStorage.getItem(KEY);if(r)return JSON.parse(r)}catch(e){}return{stages:{},unlocked:1}}
+function save(p){try{localStorage.setItem(KEY,JSON.stringify(p))}catch(e){}}
 
-          public class MainActivity extends AppCompatActivity {
-              private WebView webView;
+// ============ بازی ============
+const state={stageId:null,questions:[],index:0,score:0,correct:0,wrong:0,answered:false,total:0};
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}
+function goHome(){show('start');renderBestBadge()}
+function renderBestBadge(){
+  const p=load();
+  const played=Object.values(p.stages).reduce((s,x)=>s+(x.plays||0),0);
+  const box=document.getElementById('bestScoreBox');
+  if(played>0){
+    const best=Math.max(0,...Object.values(p.stages).map(s=>s.bestScore||0));
+    box.classList.remove('hidden');
+    box.innerHTML=`🏆 بهترین: <strong>${best}</strong> • بازی‌ها: ${played} • پاس‌شده: ${Object.values(p.stages).filter(s=>s.passed).length}/۱۰۰`;
+  } else box.classList.add('hidden');
+  document.getElementById('bankSize').textContent=BANK.length;
+}
+let activeLevel=1;
+function showStagesScreen(l){activeLevel=l||activeLevel;renderLevelTabs();renderStageGrid();show('stagesScreen')}
+function renderLevelTabs(){
+  const p=load();
+  const box=document.getElementById('levelTabs');
+  box.innerHTML='';
+  for(let l=1;l<=4;l++){
+    const btn=document.createElement('button');
+    const first=(l-1)*25+1;
+    btn.textContent=`${['🌱','⚙️','🏭','🎓'][l-1]} ${first}-${l*25}`;
+    if(l===activeLevel)btn.classList.add('active');
+    if(first>p.unlocked)btn.classList.add('locked-tab');
+    btn.onclick=()=>{activeLevel=l;renderLevelTabs();renderStageGrid();soundClick()};
+    box.appendChild(btn);
+  }
+}
+function renderStageGrid(){
+  const p=load();
+  const grid=document.getElementById('stageGrid');
+  grid.innerHTML='';
+  const first=(activeLevel-1)*25+1;
+  for(let id=first;id<=activeLevel*25;id++){
+    const rec=p.stages[id]||{};
+    const unlocked=id<=p.unlocked;
+    const btn=document.createElement('div');
+    btn.className='stage-btn';
+    if(!unlocked)btn.classList.add('locked');
+    else if(rec.passed)btn.classList.add('passed');
+    else if(id===p.unlocked)btn.classList.add('current');
+    btn.innerHTML=`<div class="num">${id}</div>${rec.bestPercent?`<div class="pct">${rec.bestPercent}٪</div>`:''}`;
+    if(unlocked)btn.onclick=()=>{soundClick();startStage(id)};
+    grid.appendChild(btn);
+  }
+}
+function startStage(id){
+  const qs=getStageQuestions(id);
+  if(qs.length<10){alert('سوال کافی نیست');return}
+  state.stageId=id;
+  state.total=10;
+  state.questions=qs.map(q=>{
+    const paired=q.o.map((opt,i)=>({opt,ok:i===q.a}));
+    const sh=_shuffle(paired);
+    return{cat:q.c,q:q.q,opts:sh.map(p=>p.opt),ans:sh.findIndex(p=>p.ok)};
+  });
+  state.index=0;state.score=0;state.correct=0;state.wrong=0;state.answered=false;
+  show('quizScreen');renderQuestion();
+}
+function renderQuestion(){
+  const q=state.questions[state.index];
+  state.answered=false;
+  document.getElementById('scorePill').textContent=`امتیاز: ${state.score}`;
+  document.getElementById('questionCounter').textContent=`مرحله ${state.stageId} • سوال ${state.index+1}/${state.total}`;
+  document.getElementById('progressFill').style.width=`${(state.index/state.total)*100}%`;
+  document.getElementById('qCatTag').textContent=q.cat;
+  document.getElementById('qText').textContent=q.q;
+  const box=document.getElementById('optionsBox');
+  box.innerHTML='';
+  const letters=['الف','ب','ج','د'];
+  q.opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';
+    btn.innerHTML=`<span class="opt-letter">${letters[i]}</span>${opt}`;
+    btn.onclick=()=>selectAnswer(i);
+    box.appendChild(btn);
+  });
+  document.getElementById('nextBtn').classList.add('hidden');
+}
+function selectAnswer(idx){
+  if(state.answered)return;
+  state.answered=true;
+  const q=state.questions[state.index];
+  const btns=document.querySelectorAll('#optionsBox .opt-btn');
+  btns.forEach((b,i)=>{
+    b.disabled=true;
+    if(i===q.ans)b.classList.add('correct');
+    if(i===idx&&i!==q.ans)b.classList.add('wrong');
+  });
+  if(idx===q.ans){state.score+=10;state.correct++;soundCorrect()}else{state.wrong++;soundWrong()}
+  document.getElementById('scorePill').textContent=`امتیاز: ${state.score}`;
+  const nb=document.getElementById('nextBtn');
+  nb.classList.remove('hidden');
+  nb.textContent=(state.index===state.total-1)?'مشاهده نتیجه 🎯':'سوال بعدی ←';
+}
+function nextQuestion(){if(state.index<state.total-1){state.index++;renderQuestion()}else finishStage()}
+function finishStage(){
+  const total=state.total;
+  const percent=Math.round((state.correct/total)*100);
+  const id=state.stageId;
+  const passScore=stagePassScore(id);
+  const passed=percent>=passScore;
+  const p=load();
+  const rec=p.stages[id]||{bestScore:0,bestPercent:0,passed:false,plays:0};
+  rec.plays=(rec.plays||0)+1;
+  if(state.score>rec.bestScore)rec.bestScore=state.score;
+  if(percent>rec.bestPercent)rec.bestPercent=percent;
+  if(passed)rec.passed=true;
+  p.stages[id]=rec;
+  if(passed&&id===p.unlocked&&id<100)p.unlocked=id+1;
+  save(p);
+  let icon='📚',msg='';
+  if(percent===100){icon='👑';msg='بی‌نقص!'}
+  else if(percent>=90){icon='🏆';msg='فوق‌العاده!'}
+  else if(percent>=75){icon='🥇';msg='عالی!'}
+  else if(percent>=60){icon='🥈';msg='قابل قبول.'}
+  else if(percent>=40){icon='🥉';msg='نیاز به مطالعه بیشتر.'}
+  else{icon='📚';msg='منابع پایه را مرور کن.'}
+  const retry=document.getElementById('retryInfo');
+  retry.textContent='';
+  if(passed){
+    msg=`✅ مرحله ${id} را پاس کردی!<br>${msg}`;
+    if(id<100&&p.unlocked>id)msg+=`<br><span style="color:var(--green);font-size:12px;">🔓 مرحله ${id+1} باز شد.</span>`;
+    retry.textContent='💡 سوالات هر مرحله یکتاست.';
+    setTimeout(soundWin,200);
+  } else {
+    msg=`❌ مرحله را پاس نکردی.<br>حد قبولی: ${passScore}٪ — نمره تو: ${percent}٪<br>${msg}`;
+    retry.textContent='🔄 دوباره تلاش کن!';
+    setTimeout(soundFail,200);
+  }
+  document.getElementById('resultIcon').textContent=icon;
+  document.getElementById('resultScore').textContent=state.score;
+  document.getElementById('resultMsg').innerHTML=msg+`<br><span style="color:var(--muted);font-size:12px;">${state.correct} صحیح از ${total}</span>`;
+  document.getElementById('statCorrect').textContent=state.correct;
+  document.getElementById('statWrong').textContent=state.wrong;
+  document.getElementById('statPercent').textContent=percent+'%';
+  const btns=document.getElementById('resultBtns');
+  btns.innerHTML='';
+  const again=document.createElement('button');
+  again.className='btn-primary';
+  again.textContent='🔁 تلاش مجدد';
+  again.onclick=()=>startStage(id);
+  btns.appendChild(again);
+  if(passed&&id<100){
+    const nxt=document.createElement('button');
+    nxt.className='btn-green';
+    nxt.textContent=`➡️ مرحله ${id+1}`;
+    nxt.onclick=()=>startStage(id+1);
+    btns.appendChild(nxt);
+  }
+  const list=document.createElement('button');
+  list.textContent='📋 لیست مراحل';
+  list.onclick=()=>showStagesScreen(stageLevel(id));
+  btns.appendChild(list);
+  const home=document.createElement('button');
+  home.textContent='🏠 منوی اصلی';
+  home.onclick=goHome;
+  btns.appendChild(home);
+  show('resultScreen');
+}
+function quitGame(){if(confirm('انصراف؟'))showStagesScreen(activeLevel)}
+function showStats(){
+  const p=load();
+  const all=Object.values(p.stages);
+  const played=all.reduce((s,x)=>s+(x.plays||0),0);
+  const passedCount=all.filter(s=>s.passed).length;
+  const avg=all.length?Math.round(all.reduce((s,x)=>s+(x.bestPercent||0),0)/all.length):0;
+  let lh='';
+  for(let l=1;l<=4;l++){
+    let c=0;
+    for(let i=(l-1)*25+1;i<=l*25;i++)if(p.stages[i]&&p.stages[i].passed)c++;
+    lh+=`<div style="display:flex;justify-content:space-between;padding:9px 13px;background:var(--card2);border-radius:9px;margin:5px 0;font-size:12.5px;"><span>${['🌱 پایه','⚙️ متوسط','🏭 پیشرفته','🎓 حرفه‌ای'][l-1]}</span><span style="color:var(--accent);font-weight:bold;">${c}/25</span></div>`;
+  }
+  document.getElementById('statsContent').innerHTML=`
+    <div class="stat-grid">
+      <div class="stat-box"><div class="stat-num">${passedCount}</div><div class="stat-label">پاس‌شده</div></div>
+      <div class="stat-box"><div class="stat-num">${played}</div><div class="stat-label">بازی</div></div>
+      <div class="stat-box"><div class="stat-num">${avg}%</div><div class="stat-label">میانگین</div></div>
+    </div>
+    <div style="text-align:center;font-size:12px;color:var(--muted);margin-bottom:10px;">بانک: <strong style="color:var(--accent);">${BANK.length}</strong> سوال</div>
+    <h3>📈 پیشرفت</h3>${lh}
+    <button class="btn-danger" style="margin-top:16px;" onclick="resetAll(true)">🗑️ پاک کردن پیشرفت</button>`;
+  show('statsScreen');
+}
+function resetAll(f){if(!confirm('آمار پاک شود؟'))return;localStorage.removeItem(KEY);if(f)showStats();else goHome()}
 
-              @SuppressLint("SetJavaScriptEnabled")
-              @Override
-              protected void onCreate(Bundle savedInstanceState) {
-                  super.onCreate(savedInstanceState);
-                  setContentView(R.layout.activity_main);
-                  getWindow().setFlags(
-                      WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                      WindowManager.LayoutParams.FLAG_FULLSCREEN);
-                  webView = findViewById(R.id.webView);
-                  WebSettings s = webView.getSettings();
-                  s.setJavaScriptEnabled(true);
-                  s.setDomStorageEnabled(true);
-                  s.setDatabaseEnabled(true);
-                  s.setAllowFileAccess(true);
-                  s.setAllowContentAccess(true);
-                  s.setLoadWithOverviewMode(true);
-                  s.setUseWideViewPort(true);
-                  s.setBuiltInZoomControls(false);
-                  s.setSupportZoom(false);
-                  s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-                  webView.setWebViewClient(new WebViewClient());
-                  webView.setWebChromeClient(new WebChromeClient());
-                  webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-                  webView.loadUrl("file:///android_asset/index.html");
-                  getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
-                      @Override
-                      public void handleOnBackPressed() {
-                          if (webView.canGoBack()) webView.goBack();
-                          else { setEnabled(false); getOnBackPressedDispatcher().onBackPressed(); }
-                      }
-                  });
-              }
-
-              @Override
-              public boolean onKeyDown(int keyCode, KeyEvent event) {
-                  if (keyCode == KeyEvent.KEYCODE_BACK && webView.canGoBack()) {
-                      webView.goBack();
-                      return true;
-                  }
-                  return super.onKeyDown(keyCode, event);
-              }
-          }
-          JAVAEOF
-
-      - name: Write activity_main.xml
-        run: |
-          cat > oilquiz/src/main/res/layout/activity_main.xml << 'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <androidx.constraintlayout.widget.ConstraintLayout
-              xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:background="#0d1b2a">
-              <WebView
-                  android:id="@+id/webView"
-                  android:layout_width="0dp"
-                  android:layout_height="0dp"
-                  app:layout_constraintTop_toTopOf="parent"
-                  app:layout_constraintBottom_toBottomOf="parent"
-                  app:layout_constraintStart_toStartOf="parent"
-                  app:layout_constraintEnd_toEndOf="parent" />
-          </androidx.constraintlayout.widget.ConstraintLayout>
-          EOF
-
-      - name: Write gradle files
-        run: |
-          cat > build.gradle << 'EOF'
-          buildscript {
-              repositories { google(); mavenCentral() }
-              dependencies { classpath 'com.android.tools.build:gradle:8.2.2' }
-          }
-          allprojects { repositories { google(); mavenCentral() } }
-          EOF
-
-          cat > settings.gradle << 'EOF'
-          pluginManagement {
-              repositories { google(); mavenCentral(); gradlePluginPortal() }
-          }
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
-              repositories { google(); mavenCentral() }
-          }
-          rootProject.name = "OilQuizAhvaz"
-          include ':oilquiz'
-          EOF
-
-          cat > gradle.properties << 'EOF'
-          android.useAndroidX=true
-          android.enableJetifier=true
-          org.gradle.jvmargs=-Xmx2048m
-          EOF
-
-          cat > oilquiz/build.gradle << 'EOF'
-          plugins { id 'com.android.application' }
-          android {
-              namespace 'com.ahvaz.oilquiz'
-              compileSdk 34
-              defaultConfig {
-                  applicationId "com.ahvaz.oilquiz.v6"
-                  minSdk 21
-                  targetSdk 34
-                  versionCode 6
-                  versionName "6.0"
-              }
-              buildTypes { release { minifyEnabled false } }
-              compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
-              }
-          }
-          dependencies {
-              implementation 'androidx.appcompat:appcompat:1.6.1'
-              implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
-          }
-          EOF
-
-      - name: Create local.properties
-        run: echo "sdk.dir=$ANDROID_HOME" > local.properties
-
-      - name: Build APK
-        run: |
-          gradle wrapper --gradle-version 8.4
-          chmod +x ./gradlew
-          ./gradlew :oilquiz:assembleDebug --no-daemon --stacktrace
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: OilQuiz-APK-v6
-          path: oilquiz/build/outputs/apk/debug/*.apk
-          if-no-files-found: warn
+// شروع
+applyTheme();
+document.querySelectorAll('.sound-btn').forEach(b=>{b.textContent=soundEnabled?'🔊':'🔇';b.classList.toggle('muted',!soundEnabled)});
+renderBestBadge();
+</script>
+</body>
+</html>
