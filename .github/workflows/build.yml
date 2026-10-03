@@ -24,9 +24,13 @@ jobs:
           mkdir -p oilquiz/src/main/res/drawable
           mkdir -p oilquiz/src/main/assets
 
-      - name: Copy all files
+      - name: Copy all source files
         run: |
           cp index.html oilquiz/src/main/assets/index.html
+          cp questions1.js oilquiz/src/main/assets/questions1.js
+          cp questions2.js oilquiz/src/main/assets/questions2.js
+          cp questions3.js oilquiz/src/main/assets/questions3.js
+          cp questions4.js oilquiz/src/main/assets/questions4.js
           cp AndroidManifest.xml oilquiz/src/main/AndroidManifest.xml
           cp MainActivity.java oilquiz/src/main/java/com/ahvaz/oilquiz/MainActivity.java
           cp activity_main.xml oilquiz/src/main/res/layout/activity_main.xml
@@ -35,8 +39,13 @@ jobs:
           cp ic_oil.xml oilquiz/src/main/res/drawable/ic_oil.xml
           cp module_build.gradle oilquiz/build.gradle
 
-      - name: Verify files
-        run: find oilquiz -type f
+      - name: Verify all files copied
+        run: |
+          echo "=== ASSETS ==="
+          ls -la oilquiz/src/main/assets/
+          echo ""
+          echo "=== ALL FILES ==="
+          find oilquiz -type f | sort
 
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_HOME" > local.properties
@@ -49,6 +58,6 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: OilQuiz-APK-v8
+          name: OilQuiz-APK-v10
           path: oilquiz/build/outputs/apk/debug/*.apk
           if-no-files-found: warn
